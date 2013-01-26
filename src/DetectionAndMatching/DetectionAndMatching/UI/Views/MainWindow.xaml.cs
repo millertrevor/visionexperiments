@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using DetectionAndMatching.UI.Models;
+using DetectionAndMatching.UI.ViewModels;
 
 namespace DetectionAndMatching.UI.Views
 {
@@ -23,6 +25,9 @@ namespace DetectionAndMatching.UI.Views
         public MainWindow()
         {
             InitializeComponent();
+            var doc = new FeaturesDoc();
+            this.DataContext = new MainWindowViewModel(doc);
+           
         }
     }
 }
