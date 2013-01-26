@@ -29,8 +29,7 @@ namespace DetectionAndMatching.UI.Views
         public MainWindow()
         {
             InitializeComponent();
-            var doc = new FeaturesDoc();
-            var dc = new MainWindowViewModel(doc);
+            var dc = new MainWindowViewModel();
             dc.PropertyChanged += dc_PropertyChanged;
             this.DataContext = dc;
         }
@@ -112,8 +111,6 @@ namespace DetectionAndMatching.UI.Views
             {
                 var pt = e.GetPosition((UIElement)sender);
                 var dc = DataContext as MainWindowViewModel;
-                var possible = dc.LeftCollection.Where(f => f.Left <= pt.X && f.Top <= pt.Y);
-                var hits = possible.Where(f => (f.Left + f.Width) < pt.X && (f.Top + f.Height) < pt.Y);                     
                 dc.SelectAllFeaturesAt(pt.X, pt.Y);
             }
         }
@@ -167,22 +164,13 @@ namespace DetectionAndMatching.UI.Views
                 }
             }
         }
-
-        //public void MenuItem_Click_1(object sender, RoutedEventArgs e)
-        //{
-        //   var doesThisWork= VisualTreeHelper.GetChild(leftItemsControl, 0);
-        //   var doesThisWorkt = VisualTreeHelper.GetChild(doesThisWork, 0);
-        //   var doesThisWorktt = VisualTreeHelper.GetChild(doesThisWorkt, 0);
-        //   canvasToTouch = (Canvas)doesThisWorktt;
-        //   myAdornerLayer = AdornerLayer.GetAdornerLayer((Visual)doesThisWorktt);
-        //   ad = new SimpleCircleAdorner((UIElement)doesThisWorktt);
-        //   myAdornerLayer.Add(ad);
-        //   myAdornerLayer.IsHitTestVisible = false;
-        //}
-
+        
         private void leftItemsControl_MouseLeave_1(object sender, MouseEventArgs e)
         {
-            this.RRMouseUp(sender, e);
+            if (mouseDown)
+            {
+                this.RRMouseUp(sender, e);
+            }
         }
  
     }

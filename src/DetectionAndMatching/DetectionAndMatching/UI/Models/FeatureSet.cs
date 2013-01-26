@@ -7,6 +7,8 @@ using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using System.Windows;
+using System.Collections.ObjectModel;
+
 
 using DetectionAndMatching.UI.ViewModels;
 
@@ -25,7 +27,7 @@ namespace DetectionAndMatching.UI.Models
 
     // The FeatureSet class represents a vector of features for a single
     // image.  You don't need to modify it.
-    public class FeatureSet : List<Feature>
+    public class FeatureSet : ObservableCollection<IFeature>
     {
 
         // Create a feature set.
@@ -64,7 +66,7 @@ namespace DetectionAndMatching.UI.Models
                     return false;
                 }
 
-                this.Capacity = n;
+              //  this.Capacity = n;
 
                 // Read each of the features.
                 int id = 1;
@@ -74,6 +76,7 @@ namespace DetectionAndMatching.UI.Models
                     feature.read_sift(reader);
                     feature.id = id;
                     id++;
+                    feature.Draw();
                     Add(feature);
                 }
             }
@@ -94,8 +97,8 @@ namespace DetectionAndMatching.UI.Models
             {
                 if ((Math.Abs(item.X - x) <= 5) && (Math.Abs(item.Y - y) <= 5))
                 {
-                    item.selected = !item.selected;
-                    item.Color = item.selected ? Brushes.Green : Brushes.Red;
+                    item.Selected = !item.Selected;
+                    item.Color = item.Selected ? Brushes.Green : Brushes.Red;
                 }
             }
         }
@@ -107,8 +110,8 @@ namespace DetectionAndMatching.UI.Models
             {
                 if ((item.X >= xMin) && (item.X <= xMax) && (item.Y >= yMin) && (item.Y <= yMax))
                 {
-                    item.selected = (!item.selected);
-                    item.Color = item.selected ? Brushes.Green : Brushes.Red;
+                    item.Selected = (!item.Selected);
+                    item.Color = item.Selected ? Brushes.Green : Brushes.Red;
                 }
             }
         }
@@ -116,13 +119,19 @@ namespace DetectionAndMatching.UI.Models
         // Select all features.
         public void select_all()
         {
-
+            foreach (var item in this)
+            {
+                item.Select();
+            }
         }
 
         // Deselect all features.
         public void deselect_all()
         {
-
+            foreach (var item in this)
+            {
+                item.DeSelect();
+            }
         }
 
         // Take only the selected features.

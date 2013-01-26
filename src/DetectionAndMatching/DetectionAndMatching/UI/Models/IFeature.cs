@@ -13,6 +13,8 @@ namespace DetectionAndMatching.UI.Models
         double Top { get; set; }
         double Width { get; set; }
         double Height { get; set; }
+        bool Selected { get; set; }
+        System.Windows.Visibility Visibility { get; set; }
         SolidColorBrush Color { get; set; }
         int X1 { get; set; }
         int Y1 { get; set; }
@@ -26,5 +28,8 @@ namespace DetectionAndMatching.UI.Models
         int Y5 { get; set; }
         int X { get; set; }
         int Y { get; set; }
+        void InvertSelection();
+        void Select();
+        void DeSelect();        
     }
 }

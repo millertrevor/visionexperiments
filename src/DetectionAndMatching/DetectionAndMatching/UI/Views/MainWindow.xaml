@@ -31,8 +31,8 @@
                     <MenuItem Header="_Exit" Command="{Binding ExitCommand}"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="_Image">
-                    <MenuItem Header="_Select All Features"></MenuItem>
-                    <MenuItem Header="_Deselect All Features"></MenuItem>
+                    <MenuItem Header="_Select All Features" Command="{Binding SelectAllFeatures}" CommandParameter="Select"></MenuItem>
+                    <MenuItem Header="_Deselect All Features" Command="{Binding SelectAllFeatures}" CommandParameter="Deselect"></MenuItem>
                     <MenuItem Header="_Perform Query"></MenuItem>
                 </MenuItem>
                 
@@ -41,7 +41,7 @@
                         <MenuItem Header="Algorithm _1"></MenuItem>
                         <MenuItem Header="Algorithm _2"></MenuItem>
                     </MenuItem>
-                    <MenuItem Header="_Toggle Features"></MenuItem>
+                    <MenuItem Header="_Toggle Features" Command="{Binding ToggleFeatures}"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="_Help">
                     <MenuItem Header="_About"></MenuItem>
@@ -50,7 +50,7 @@
             
             <Viewbox x:Name="leftViewBox" DockPanel.Dock="Left">
                 <!--<Grid>-->
-                <ItemsControl x:Name="leftItemsControl" ItemsPanel="{DynamicResource ResourceKey=CanvasLeftTemplate}" MouseMove="itemsControl_MouseMove" MouseRightButtonDown="RRMouseDown" MouseRightButtonUp="RRMouseUp" MouseLeave="leftItemsControl_MouseLeave_1"  ItemsSource="{Binding LeftCollection}" Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}" RenderTransformOrigin="0.5,0.5">
+                <ItemsControl x:Name="leftItemsControl" ItemsPanel="{DynamicResource ResourceKey=CanvasLeftTemplate}" MouseMove="itemsControl_MouseMove" MouseRightButtonDown="RRMouseDown" MouseRightButtonUp="RRMouseUp" MouseLeave="leftItemsControl_MouseLeave_1"  ItemsSource="{Binding QueryFeatures}" Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}" RenderTransformOrigin="0.5,0.5">
                     <ItemsControl.RenderTransform>
                         <TransformGroup>
                             <ScaleTransform ScaleY="1.0"/>
@@ -70,17 +70,17 @@
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>-->
 
-                <ItemsControl.ItemTemplate>
-                <DataTemplate DataType="{x:Type models:Feature}">
-                    <Grid IsHitTestVisible="True"  >
-                    <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
-                            <Line X1="{Binding X2}" Y1="{Binding Y2}" X2="{Binding X3}" Y2="{Binding Y3}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
-                            <Line X1="{Binding X3}" Y1="{Binding Y3}" X2="{Binding X4}" Y2="{Binding Y4}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
-                            <Line X1="{Binding X4}" Y1="{Binding Y4}" X2="{Binding X1}" Y2="{Binding Y1}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
-                            <Line X1="{Binding X}" Y1="{Binding Y}" X2="{Binding X5}" Y2="{Binding Y5}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="{x:Type models:Feature}">
+                            <Grid IsHitTestVisible="True" Visibility="{Binding Visibility}" >
+                                <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
+                                <Line X1="{Binding X2}" Y1="{Binding Y2}" X2="{Binding X3}" Y2="{Binding Y3}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
+                                <Line X1="{Binding X3}" Y1="{Binding Y3}" X2="{Binding X4}" Y2="{Binding Y4}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
+                                <Line X1="{Binding X4}" Y1="{Binding Y4}" X2="{Binding X1}" Y2="{Binding Y1}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
+                                <Line X1="{Binding X}" Y1="{Binding Y}" X2="{Binding X5}" Y2="{Binding Y5}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             </Grid>
                         </DataTemplate>
-            </ItemsControl.ItemTemplate>
+                    </ItemsControl.ItemTemplate>
                 </ItemsControl>
                     <!-- This canvas is overlaid over the previous canvas and is used to 
                 place the rectangle that implements the drag selection box. -->
@@ -110,7 +110,7 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:Feature}">
-                            <Grid>
+                            <Grid IsHitTestVisible="True" Visibility="{Binding Visibility}" >
                                 <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                                 <Line X1="{Binding X2}" Y1="{Binding Y2}" X2="{Binding X3}" Y2="{Binding Y3}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                                 <Line X1="{Binding X3}" Y1="{Binding Y3}" X2="{Binding X4}" Y2="{Binding Y4}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
@@ -118,7 +118,7 @@
                                 <Line X1="{Binding X}" Y1="{Binding Y}" X2="{Binding X5}" Y2="{Binding Y5}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             </Grid>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>                   
+                    </ItemsControl.ItemTemplate>               
                 </ItemsControl>
             </Viewbox>
         </DockPanel>

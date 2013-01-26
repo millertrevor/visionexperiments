@@ -49,7 +49,21 @@ namespace DetectionAndMatching.UI.Models
                 return (int)(x + 0.5);
             }
         }
-
+        public void InvertSelection()
+        {
+            selected = !selected;
+            Color = selected ? Brushes.Green : Brushes.Red;
+        }
+        public void Select()
+        {
+            selected = true;
+            Color = selected ? Brushes.Green : Brushes.Red;
+        }
+        public void DeSelect()
+        {
+            selected = false;
+            Color = selected ? Brushes.Green : Brushes.Red;
+        }
         private int _x1;
         private int _y1;
         private int _x2;
@@ -63,7 +77,7 @@ namespace DetectionAndMatching.UI.Models
         // Draw the feature, currently as a square.
         // Draw a feature.  Currently, this just draws a green box for selected
         // features, and a red box for unselected features.
-        public void draw() //const;
+        public void Draw() //const;
         {
             Color = selected ? Brushes.Green : Brushes.Red;
 
@@ -259,6 +273,17 @@ namespace DetectionAndMatching.UI.Models
         {
             get { return y; }
             set { y = value; }
+        }
+        public bool Selected
+        {
+            get { return selected; }
+            set { selected = value; NotifyPropertyChanged("Selected"); }
+        }
+        private System.Windows.Visibility _visibility = System.Windows.Visibility.Visible;
+        public System.Windows.Visibility Visibility
+        {
+            get { return _visibility; }
+            set { _visibility = value; NotifyPropertyChanged("Visibility"); }
         }
         public event PropertyChangedEventHandler PropertyChanged;
 
