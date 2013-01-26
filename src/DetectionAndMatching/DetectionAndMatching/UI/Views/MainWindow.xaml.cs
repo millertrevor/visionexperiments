@@ -30,85 +30,30 @@ namespace DetectionAndMatching.UI.Views
         {
             InitializeComponent();
             var doc = new FeaturesDoc();
-            this.DataContext = new MainWindowViewModel(doc, this);
-           
+            var dc = new MainWindowViewModel(doc);
+            dc.PropertyChanged += dc_PropertyChanged;
+            this.DataContext = dc;
         }
-        private void WindowLoaded(object sender, RoutedEventArgs e)
-        {
-            //var itemToAdorn = (Canvas)this.Template.FindName("leftCanvas", this);
-            //myAdornerLayer = AdornerLayer.GetAdornerLayer(itemToAdorn);
-            //ad = new SimpleCircleAdorner(itemToAdorn);
-            //myAdornerLayer.Add(ad);
 
-            ////foreach (UIElement toAdorn in myStackPanel.Children)
-            ////    myAdornerLayer.Add(new SimpleCircleAdorner(toAdorn));
-        }
-        private void leftItemsControl_MouseWheel_1(object sender, MouseWheelEventArgs e)
+        void dc_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            //var st = (ScaleTransform)((TransformGroup)leftItemsControl.RenderTransform).Children.First(stTransform => stTransform is ScaleTransform);
-            //double zoom = e.Delta > 0 ? .2 : -.2;
-            
-            //st.ScaleX += zoom;
-            //st.ScaleY += zoom;
+            if (e.PropertyName == "LeftPictureLocation")
+            {
+                var doesThisWork = VisualTreeHelper.GetChild(leftItemsControl, 0);
+                var doesThisWorkt = VisualTreeHelper.GetChild(doesThisWork, 0);
+                var doesThisWorktt = VisualTreeHelper.GetChild(doesThisWorkt, 0);
+                canvasToTouch = (Canvas)doesThisWorktt;
+                myAdornerLayer = AdornerLayer.GetAdornerLayer((Visual)doesThisWorktt);
+                ad = new SimpleCircleAdorner((UIElement)doesThisWorktt);
+                myAdornerLayer.Add(ad);
+                myAdornerLayer.IsHitTestVisible = false;
+            }
         }
-        Point start;
-        Point origin;
-        private void image_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void itemsControl_MouseMove(object sender, MouseEventArgs e)
         {
-            //leftItemsControl.CaptureMouse();
-            //var tt = (TranslateTransform)((TransformGroup)leftItemsControl.RenderTransform)
-            //    .Children.First(tr => tr is TranslateTransform);
-            //start = e.GetPosition(leftViewBox);
-            //origin = new Point(tt.X, tt.Y);
-        }
-        private void image_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            //leftItemsControl.ReleaseMouseCapture();
-        }
-        private void image_MouseMove(object sender, MouseEventArgs e)
-        {
-            //if (leftItemsControl.IsMouseCaptured)
-            //{
-            //    var tt = (TranslateTransform)((TransformGroup)leftItemsControl.RenderTransform)
-            //        .Children.First(tr => tr is TranslateTransform);
-            //    Vector v = start - e.GetPosition(leftViewBox);
-            //    tt.X = origin.X - v.X;
-            //    tt.Y = origin.Y - v.Y;
-            //}
-
             if (mouseDown)
             {
-            //    // When the mouse is held down, reposition the drag selection box.
-
-                Point mousePos = e.GetPosition(canvasToTouch);//leftviewbox
-
-                //if (mouseDownPos.X < mousePos.X)
-                //{
-                //    //Canvas.SetLeft(selectionBox, mouseDownPos.X);
-                //    //selectionBox.Width = mousePos.X - mouseDownPos.X;
-                //    ADWidth = mousePos.X - mouseDownPos.X;
-                //}
-                //else
-                //{
-                //    //Canvas.SetLeft(selectionBox, mousePos.X);
-                //    //selectionBox.Width = mouseDownPos.X - mousePos.X;
-                //    ADWidth = mouseDownPos.X - mousePos.X;
-                //}
-
-                //if (mouseDownPos.Y < mousePos.Y)
-                //{
-                //    //Canvas.SetTop(selectionBox, mouseDownPos.Y);
-                //    //selectionBox.Height = mousePos.Y - mouseDownPos.Y;
-                //    ADHeight = mousePos.Y - mouseDownPos.Y;
-                //}
-                //else
-                //{
-                //    //Canvas.SetTop(selectionBox, mousePos.Y);
-                //    //selectionBox.Height = mouseDownPos.Y - mousePos.Y;
-                //    ADHeight = mouseDownPos.Y - mousePos.Y;
-                //}
-                //ADWidth = Math.Abs(mousePos.X - mouseDownPos.X);
-                //ADHeight = Math.Abs(mousePos.Y - mouseDownPos.Y);
+                Point mousePos = e.GetPosition(canvasToTouch);
                 ADWidth = mousePos.X - mouseDownPos.X;
                 ADHeight = mousePos.Y - mouseDownPos.Y;
                 this.InvalidateVisual();
@@ -124,29 +69,13 @@ namespace DetectionAndMatching.UI.Views
 
         private void RRMouseDown(object sender, MouseEventArgs e)
         {
-            mouseDownPos = e.GetPosition(canvasToTouch); //leftviewbox
+            mouseDownPos = e.GetPosition(canvasToTouch); 
             ADLeft = mouseDownPos.X;
             ADTop = mouseDownPos.Y;
             ADWidth = 0;
             ADHeight = 0;
             VisibleAD = true;
-           // this.InvalidateVisual();
-           // this.InvalidateArrange();
-          //  this.UpdateLayout();
-
-            //// Capture and track the mouse.
             mouseDown = true;
-           // mouseDownPos = e.GetPosition(leftViewBox);
-            //leftViewBox.CaptureMouse();
-
-            //// Initial placement of the drag selection box.         
-            //Canvas.SetLeft(selectionBox, mouseDownPos.X);
-            //Canvas.SetTop(selectionBox, mouseDownPos.Y);
-            //selectionBox.Width = 0;
-            //selectionBox.Height = 0;
-
-            //// Make the drag selection box visible.
-            //selectionBox.Visibility = Visibility.Visible;
         }
         private void RRMouseUp(object sender, MouseEventArgs e)
         {
@@ -171,65 +100,20 @@ namespace DetectionAndMatching.UI.Views
 
             var dc = DataContext as MainWindowViewModel;
             dc.SelectAllFeaturesInArea(XToUse, XToUse + WidthToUse, YToUse, YToUse + HeightToUse);
-            //// Hide the drag selection box.
-            //selectionBox.Visibility = Visibility.Collapsed;
-
-           // Point mouseUpPos = e.GetPosition(canvasToTouch);//leftviewbox
             VisibleAD = false;
-           // this.InvalidateVisual();
-          //  this.InvalidateArrange();
-           // this.UpdateLayout();
             myAdornerLayer.Remove(ad);
             myAdornerLayer.Add(ad);
-
-            //// TODO: 
-            ////
-            //// The mouse has been released, check to see if any of the items 
-            //// in the other canvas are contained within mouseDownPos and 
-            //// mouseUpPos, for any that are, select them!
-            ////
         }
 
-       //List<DependencyObject> hitResultsList = new List<DependencyObject>();
-       // public HitTestResultBehavior SomeTypeHitCallback(HitTestResult result)
-       // {
-       //    hitResultsList.Add(result.VisualHit);
-       //     if (result.VisualHit is Ellipse)
-       //     {
-       //         var ellipse = result.VisualHit as Ellipse;
-
-       //         // Does not work...
-       //         object item = leftItemsControl.ItemContainerGenerator.ItemFromContainer(ellipse);
-       //         // item now equals DependencyProperty.UnsetValue
-
-       //         // Here I want to change the property of the object
-       //         // associated with the Ellipse...
-       //         var o = item as Feature;
-       //         o.selected = !o.selected;
-       //        // o.IsSelected = !o.IsSelected;
-
-       //         return HitTestResultBehavior.Continue;
-       //     }
-
-       //     return HitTestResultBehavior.Continue;
-       // }
-       // protected override HitTestResult HitTestCore(PointHitTestParameters hitTestParameters)
-       // {
-       //     Point pt = hitTestParameters.HitPoint;
-       //     //return base.HitTestCore(hitTestParameters);
-       //     return new PointHitTestResult(this, pt);
-       // }
+    
         private void Canvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
             {
                 var pt = e.GetPosition((UIElement)sender);
-
                 var dc = DataContext as MainWindowViewModel;
                 var possible = dc.LeftCollection.Where(f => f.Left <= pt.X && f.Top <= pt.Y);
-                var hits = possible.Where(f => (f.Left + f.Width) < pt.X && (f.Top + f.Height) < pt.Y);
-                int stop = -1;
-                //dc.LeftCollection
+                var hits = possible.Where(f => (f.Left + f.Width) < pt.X && (f.Top + f.Height) < pt.Y);                     
                 dc.SelectAllFeaturesAt(pt.X, pt.Y);
             }
         }
@@ -246,16 +130,7 @@ namespace DetectionAndMatching.UI.Views
                 : base(adornedElement)
             {
             }
-
-            //protected override Size MeasureOverride(Size constraint)
-            //{
-            //    var result = base.MeasureOverride(constraint);
-            //    // ... add custom measure code here if desired ...
-            //    InvalidateVisual();
-            //    return result;
-            //}
-            // A common way to implement an adorner's rendering behavior is to override the OnRender
-            // method, which is called by the layout system as part of a rendering pass.
+            
             protected override void OnRender(DrawingContext drawingContext)
             {
                 if (MainWindow.VisibleAD)
@@ -293,19 +168,17 @@ namespace DetectionAndMatching.UI.Views
             }
         }
 
-        public void MenuItem_Click_1(object sender, RoutedEventArgs e)
-        {
-           var doesThisWork= VisualTreeHelper.GetChild(leftItemsControl, 0);
-           var doesThisWorkt = VisualTreeHelper.GetChild(doesThisWork, 0);
-           var doesThisWorktt = VisualTreeHelper.GetChild(doesThisWorkt, 0);
-           canvasToTouch = (Canvas)doesThisWorktt;
-           //var tryTryAgain= this.FindName("leftCanvas") as Canvas;
-           // var itemToAdorn = (Canvas)this.Template.FindName("leftCanvas", this);
-           myAdornerLayer = AdornerLayer.GetAdornerLayer((Visual)doesThisWorktt);
-           ad = new SimpleCircleAdorner((UIElement)doesThisWorktt);
-           myAdornerLayer.Add(ad);
-           myAdornerLayer.IsHitTestVisible = false;
-        }
+        //public void MenuItem_Click_1(object sender, RoutedEventArgs e)
+        //{
+        //   var doesThisWork= VisualTreeHelper.GetChild(leftItemsControl, 0);
+        //   var doesThisWorkt = VisualTreeHelper.GetChild(doesThisWork, 0);
+        //   var doesThisWorktt = VisualTreeHelper.GetChild(doesThisWorkt, 0);
+        //   canvasToTouch = (Canvas)doesThisWorktt;
+        //   myAdornerLayer = AdornerLayer.GetAdornerLayer((Visual)doesThisWorktt);
+        //   ad = new SimpleCircleAdorner((UIElement)doesThisWorktt);
+        //   myAdornerLayer.Add(ad);
+        //   myAdornerLayer.IsHitTestVisible = false;
+        //}
 
         private void leftItemsControl_MouseLeave_1(object sender, MouseEventArgs e)
         {

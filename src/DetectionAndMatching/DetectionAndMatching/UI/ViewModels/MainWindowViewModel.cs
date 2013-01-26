@@ -10,7 +10,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DetectionAndMatching.UI.Models;
-using DetectionAndMatching.UI.Views;
 
 namespace DetectionAndMatching.UI.ViewModels
 {
@@ -18,37 +17,13 @@ namespace DetectionAndMatching.UI.ViewModels
     {
         private FeaturesDoc _doc;
         private string _dirLocation;
-        MainWindow _yuck;
+       
 
-        public MainWindowViewModel(FeaturesDoc incomingDoc, MainWindow yuck)
+        public MainWindowViewModel(FeaturesDoc incomingDoc)
         {
-            _doc = incomingDoc;
-            _yuck = yuck;
-
-          //  LeftPictureLocation = @"C:\Users\Trevor\Downloads\angrytree.jpg";
-            //_doc.load_query_image(LeftPictureLocation);
-           // var bi = new BitmapImage(new Uri(LeftPictureLocation,UriKind.RelativeOrAbsolute));
-           // LeftImageHeight = bi.PixelHeight;
-           // LeftImageWidth = bi.PixelWidth;
-
-         
-            LeftCollection = new ObservableCollection<IItemViewModel>();
-            //ItemViewModel m1 = new ItemViewModel();
-            //m1.Top = 1;
-            //m1.Left = 1;
-            //m1.Height = 10;
-            //m1.Width = 10;
-            //m1.Color = Brushes.Black;
-
-            //ItemViewModel m2 = new ItemViewModel();
-            //m2.Top = 50;
-            //m2.Left = 50;
-            //m2.Height = 30;
-            //m2.Width = 30;
-            //m2.Color = Brushes.Red;
-
-            //LeftCollection.Add(m1);
-            //LeftCollection.Add(m2);
+            _doc = incomingDoc;           
+            
+            LeftCollection = new ObservableCollection<IFeature>();           
         }
         public void SelectAllFeaturesAt(double X, double Y)
         {
@@ -65,7 +40,7 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
 
-        public ObservableCollection<IItemViewModel> LeftCollection { get; private set; }
+        public ObservableCollection<IFeature> LeftCollection { get; private set; }
         private string _leftPictureLocation;
         public String LeftPictureLocation
         {
@@ -86,30 +61,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 NotifyPropertyChanged("RightPictureLocation");
             }
         }
-
-        //private int _width = 500;
-        //private int _height = 500;
-
-        //public int Width
-        //{
-        //    get { return _width; }
-        //    set
-        //    {
-        //        _width = value;
-        //        NotifyPropertyChanged("Width");
-        //    }
-        //}
-
-        //public int Height
-        //{
-        //    get { return _height; }
-        //    set
-        //    {
-        //        _height = value;
-        //        NotifyPropertyChanged("Height");
-        //    }
-        //}
-
+        
         private int _leftImageWidth;
         private int _leftImageHeight;
 
@@ -119,7 +71,6 @@ namespace DetectionAndMatching.UI.ViewModels
             set
             {
                 _leftImageWidth = value;
-                //Width = _leftImageWidth;
                 NotifyPropertyChanged("LeftImageWidth");
             }
         }
@@ -130,7 +81,6 @@ namespace DetectionAndMatching.UI.ViewModels
             set
             {
                 _leftImageHeight = value;
-                //Height = _leftImageHeight;
                 NotifyPropertyChanged("LeftImageHeight");
             }
         }
@@ -143,7 +93,6 @@ namespace DetectionAndMatching.UI.ViewModels
             set
             {
                 _rightImageWidth = value;
-                //Width = _rightImageWidth;
                 NotifyPropertyChanged("RightImageWidth");
             }
         }
@@ -154,7 +103,6 @@ namespace DetectionAndMatching.UI.ViewModels
             set
             {
                 _rightImageHeight = value;
-                //Height = _rightImageHeight;
                 NotifyPropertyChanged("RightImageHeight");
             }
         }
@@ -178,17 +126,7 @@ namespace DetectionAndMatching.UI.ViewModels
 
         private void LoadQueryImageExecute()
         {
-            //char* name = fl_file_chooser("Open File", "{*.p[gp]m,*.jpg}", NULL);
-
-            //if (name != NULL)
-            //{
-            //    doc->load_query_image(name);
-            //}
-            // Create OpenFileDialog 
             var dlg = new Microsoft.Win32.OpenFileDialog();
-
-
-
             // Set filter for file extension and default file extension 
             dlg.DefaultExt = ".jpg";
             dlg.Filter = "Image Files (*.jpg)|*.jpg;*.pgm;*.ppm";
@@ -200,8 +138,7 @@ namespace DetectionAndMatching.UI.ViewModels
 
             // Display OpenFileDialog by calling ShowDialog method 
             bool? result = dlg.ShowDialog();
-
-
+            
             // Get the selected file name and display in a TextBox 
             if (result == true)
             {
@@ -213,8 +150,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 _doc.load_query_image(LeftPictureLocation);
                 var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
                 LeftImageHeight = bi.PixelHeight;
-                LeftImageWidth = bi.PixelWidth;
-                _yuck.MenuItem_Click_1(null, null);
+                LeftImageWidth = bi.PixelWidth;                
             }
         }
 
@@ -237,18 +173,8 @@ namespace DetectionAndMatching.UI.ViewModels
         }
         private void LoadQueryFeaturesSIFTExecute()
         {
-           // char* name = fl_file_chooser("Open File", "*.key", NULL);
-
-           // if (name != NULL)
-           // {
-           //     doc->load_query_features(name, true);
-           // }
-
-            // Create OpenFileDialog 
             var dlg = new Microsoft.Win32.OpenFileDialog();
-
-
-
+            
             // Set filter for file extension and default file extension 
             dlg.DefaultExt = ".key";
             dlg.Filter = "KEY Files (*.key)|*.key";
@@ -256,12 +182,10 @@ namespace DetectionAndMatching.UI.ViewModels
             {
                 dlg.InitialDirectory = Environment.CurrentDirectory;
             }
-         
-
+            
             // Display OpenFileDialog by calling ShowDialog method 
             bool? result = dlg.ShowDialog();
-
-
+            
             // Get the selected file name and display in a TextBox 
             if (result == true)
             {
@@ -276,8 +200,6 @@ namespace DetectionAndMatching.UI.ViewModels
                     item.draw();
                     LeftCollection.Add(item);
                 }
-               
-               // LeftCollection.a
             }
         }
         private ICommand _exitCommand;
@@ -300,6 +222,7 @@ namespace DetectionAndMatching.UI.ViewModels
             Application.Current.Shutdown(0);
         }
 
+        
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(String propertyName)
@@ -310,44 +233,5 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
     }
-
-    //public class ItemViewModel
-    //    : IItemViewModel
-    //{
-    //    public double Left { get; set; }
-    //    public double Top { get; set; }
-    //    public double Width { get; set; }
-    //    public double Height { get; set; }
-    //    public SolidColorBrush Color { get; set; }
-
-    //    // whatever you need...
-    //}
-
-    public interface IItemViewModel
-    {
-         double Left { get; set; }
-         double Top { get; set; }
-         double Width { get; set; }
-         double Height { get; set; }
-         SolidColorBrush Color { get; set; }
-        int X1 { get; set; }
-        int Y1 { get; set; }
-        int X2 { get; set; }
-        int Y2 { get; set; }
-        int X3 { get; set; }
-        int Y3 { get; set; }
-        int X4 { get; set; }
-        int Y4 { get; set; }
-        int X5 { get; set; }
-        int Y5 { get; set; }
-        int X { get; set; }
-        int Y { get; set; }
-    }
-
-    public class CollectionViewModel
-    {
-       
-
-        // some code which fills the Collection with items
-    }
+   
 }

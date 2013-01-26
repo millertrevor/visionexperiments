@@ -61,8 +61,10 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="UI\Models\Feature.cs" />
     <Compile Include="UI\Models\FeaturesDoc.cs" />
     <Compile Include="UI\Models\FeatureSet.cs" />
+    <Compile Include="UI\Models\IFeature.cs" />
     <Compile Include="UI\Models\ImageDatabase.cs" />
     <Compile Include="UI\ViewModels\MainWindowViewModel.cs" />
     <Compile Include="UI\ViewModels\RelayCommand.cs" />
