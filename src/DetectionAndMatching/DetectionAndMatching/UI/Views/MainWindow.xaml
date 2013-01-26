@@ -3,67 +3,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:DetectionAndMatching.UI.ViewModels"
         xmlns:models="clr-namespace:DetectionAndMatching.UI.Models"
-
-
+        Loaded="WindowLoaded" 
         Title="MainWindow" >
-    <!--Height="{Binding Height, FallbackValue=500, Mode=TwoWay, TargetNullValue=500, UpdateSourceTrigger=PropertyChanged}" Width="{Binding Width, FallbackValue=500, Mode=TwoWay, TargetNullValue=500, UpdateSourceTrigger=PropertyChanged}"-->
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"></BooleanToVisibilityConverter>
-        <!-- Make the left position of the item depend on the ActualWidth of the Canvas,
-             the relative Left position (between 0 and 1) from the ItemViewModel, and the ActualWidth
-             of the item itself. This is needed because the Canvas.Left property defines the
-             position of the left side, not the center. Therefore, we calculate the position of
-             the center this way:
-                  (Canvas.ActualWidth * ItemViewModel.Left) - (Item.ActualWidth / 2)
-        -->
-        <!-- the top position of the items is determined the same way as the left position
-             which is described above -->
-        <!--<DataTemplate DataType="{x:Type local:ItemViewModel}">
-            <Rectangle Width="{Binding Width}" Height="{Binding Height}">
-
-            
-                <Canvas.Left>
-                    <MultiBinding>
-                        <MultiBinding.Converter>
-                            <converters:ExpressionConverter Expression="{}({0} * {1}) - ({2} / 2)"/>
-                        </MultiBinding.Converter>
-                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Canvas}}"/>
-                        <Binding Path="Left"/>
-                        <Binding Path="ActualWidth" RelativeSource="{RelativeSource Self}"/>
-                    </MultiBinding>
-                </Canvas.Left>
-
-                
-                <Canvas.Top>
-                    <MultiBinding>
-                        <MultiBinding.Converter>
-                            <converters:ExpressionConverter Expression="{}({0} * {1}) - ({2} / 2)"/>
-                        </MultiBinding.Converter>
-                        <Binding Path="ActualHeight" RelativeSource="{RelativeSource FindAncestor, AncestorType={x:Type Canvas}}"/>
-                        <Binding Path="Top"/>
-                        <Binding Path="ActualHeight" RelativeSource="{RelativeSource Self}"/>
-                    </MultiBinding>
-                </Canvas.Top>
-
-            </Rectangle>
-        </DataTemplate>-->
-        
+       
+        <ItemsPanelTemplate x:Key="CanvasLeftTemplate">
+            <Canvas x:Name="leftCanvas" PreviewMouseDown="Canvas_PreviewMouseLeftButtonDown" >
+                <Canvas.Background>
+                    <ImageBrush Stretch="Uniform" ImageSource="{Binding LeftPictureLocation}"/>
+                </Canvas.Background>
+            </Canvas>
+        </ItemsPanelTemplate>
     </Window.Resources>
     <Grid>
-        <!--<Menu >
-            <Menu.Resources>
-                <Style x:Key="ThemeMenuItemStyle" TargetType="MenuItem">
-                    <Setter Property="Header" Value="{Binding Name}"></Setter>
-                    <Setter Property="Command" Value="{Binding ActivateCommand}"/>
-                    <Setter Property="IsChecked" Value="{Binding IsActive}" />
-                    <Setter Property="IsCheckable" Value="True"/>
-                </Style>
-            </Menu.Resources>
-            <MenuItem Header="_File" ItemsSource="{Binding Themes}" ItemContainerStyle="{StaticResource ThemeMenuItemStyle}"  />
-            <MenuItem Header="Image"></MenuItem>
-            <MenuItem Header="Options"></MenuItem>
-            <MenuItem Header="Help"></MenuItem>
-        </Menu>-->
         <DockPanel>
             <Menu DockPanel.Dock="Top" >
                 <MenuItem Header="_File">
@@ -92,59 +45,35 @@
                     <MenuItem Header="_Toggle Features"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="_Help">
-                    <MenuItem Header="_About">
-                        <Button Click="Button_Click_1">pause</Button>
-                    </MenuItem>
+                    <MenuItem Header="_About"></MenuItem>
                 </MenuItem>
             </Menu>
-       
-        <!--<Viewbox>
-        <Canvas Children="{Binding }"></Canvas>
-        </Viewbox>-->
-
-            <!--<ItemsControl ItemsSource="{Binding Path=Nodes}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <Canvas />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="{Binding Path=XPos}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Path=YPos}" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>
-            </ItemsControl>-->
-            <!---->
-  <!--Width="{Binding ImageWidth, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                       Height="{Binding ImageHeight, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"-->
-            <!--<Grid DockPanel.Dock="Left" >
-<DockPanel>-->
-                <!--<Image DockPanel.Dock="Left" x:Name="image" Source="{Binding PictureLocation}"-->
-                     
-                       <!-->-->
-                     
-                <!--</Image>-->
+            
             <Viewbox x:Name="leftViewBox" DockPanel.Dock="Left">
-                <!--Width="{Binding Width, ElementName=image}" Height="{Binding Height, ElementName=image}"-->
-                <ItemsControl x:Name="leftItemsControl"  ItemsSource="{Binding LeftCollection}" Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}">
+                <!--<Grid>-->
+                <ItemsControl x:Name="leftItemsControl" ItemsPanel="{DynamicResource ResourceKey=CanvasLeftTemplate}" MouseWheel="leftItemsControl_MouseWheel_1" MouseLeftButtonDown="image_MouseLeftButtonDown" MouseLeftButtonUp="image_MouseLeftButtonUp" MouseMove="image_MouseMove" MouseRightButtonDown="RRMouseDown" MouseRightButtonUp="RRMouseUp" MouseLeave="leftItemsControl_MouseLeave_1"  ItemsSource="{Binding LeftCollection}" Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}" RenderTransformOrigin="0.5,0.5">
+                    <ItemsControl.RenderTransform>
+                        <TransformGroup>
+                            <ScaleTransform ScaleY="1.0"/>
+                            <SkewTransform/>
+                            <RotateTransform/>
+                            <TranslateTransform/>
+                        </TransformGroup>
+                    </ItemsControl.RenderTransform>
 
-                <ItemsControl.ItemsPanel>
+                    <!--<ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <!--Width="{Binding Width, ElementName=image}" Height="{Binding Height, ElementName=image}"-->
-                        <Canvas x:Name="leftCanvas" >
+                            <Canvas x:Name="leftCanvas" PreviewMouseDown="Canvas_PreviewMouseLeftButtonDown" >
                                     <Canvas.Background>
                                         <ImageBrush Stretch="Uniform" ImageSource="{Binding LeftPictureLocation}"/>
                                     </Canvas.Background>
                                 </Canvas>
                     </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
+                </ItemsControl.ItemsPanel>-->
 
                 <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:Feature}">
-                    <!--<Rectangle StrokeThickness="1"  Stroke="{Binding Color}" Width="{Binding Width}" Height="{Binding Height}"
-                       Canvas.Left="{Binding Left}" Canvas.Top="{Binding Top}"/>-->
-                            <Grid >
+                    <Grid IsHitTestVisible="True"  >
                     <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             <Line X1="{Binding X2}" Y1="{Binding Y2}" X2="{Binding X3}" Y2="{Binding Y3}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             <Line X1="{Binding X3}" Y1="{Binding Y3}" X2="{Binding X4}" Y2="{Binding Y4}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
@@ -153,34 +82,25 @@
                             </Grid>
                         </DataTemplate>
             </ItemsControl.ItemTemplate>
-                <!--<ItemsControl.ItemContainerStyle>
-                    <Style TargetType="ContentPresenter">
-                        <Setter Property="Canvas.Left" Value="{Binding Path=Left}" />
-                        <Setter Property="Canvas.Top" Value="{Binding Path=Top}" />
-                    </Style>
-                </ItemsControl.ItemContainerStyle>-->
-            </ItemsControl>
+                </ItemsControl>
+                    <!-- This canvas is overlaid over the previous canvas and is used to 
+                place the rectangle that implements the drag selection box. -->
+                    <!--<Canvas Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}">
+                   
+                    <Rectangle
+                x:Name="selectionBox"
+                Visibility="Collapsed"
+                Stroke="Black"
+                StrokeThickness="1"
+                />
+                </Canvas>
+                </Grid>-->
             </Viewbox>
-            <!--//fl_line(x1, y1, x2, y2);
-          
-           
-            //fl_line(x2, y2, x3, y3);
-        
-            //fl_line(x3, y3, x4, y4);
-          
-            //fl_line(x4, y4, x1, y1);
-            
-            //fl_line(x, y, x5, y5);-->
-            
-            <!--</DockPanel>
-            </Grid>-->
             <Viewbox DockPanel.Dock="Right">
-                <!--Width="{Binding Width, ElementName=image}" Height="{Binding Height, ElementName=image}"-->
                 <ItemsControl  ItemsSource="{Binding RightCollection}" Width="{Binding RightImageWidth}" Height="{Binding RightImageHeight}">
 
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <!--Width="{Binding Width, ElementName=image}" Height="{Binding Height, ElementName=image}"-->
                             <Canvas  >
                                 <Canvas.Background>
                                     <ImageBrush Stretch="Uniform" ImageSource="{Binding RightPictureLocation}"/>
@@ -191,8 +111,6 @@
 
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:Feature}">
-                            <!--<Rectangle StrokeThickness="1"  Stroke="{Binding Color}" Width="{Binding Width}" Height="{Binding Height}"
-                       Canvas.Left="{Binding Left}" Canvas.Top="{Binding Top}"/>-->
                             <Grid>
                                 <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                                 <Line X1="{Binding X2}" Y1="{Binding Y2}" X2="{Binding X3}" Y2="{Binding Y3}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
@@ -201,13 +119,7 @@
                                 <Line X1="{Binding X}" Y1="{Binding Y}" X2="{Binding X5}" Y2="{Binding Y5}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             </Grid>
                         </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                    <ItemsControl.ItemContainerStyle>
-                        <Style TargetType="ContentPresenter">
-                            <Setter Property="Canvas.Left" Value="{Binding Path=Left}" />
-                            <Setter Property="Canvas.Top" Value="{Binding Path=Top}" />
-                        </Style>
-                    </ItemsControl.ItemContainerStyle>
+                    </ItemsControl.ItemTemplate>                   
                 </ItemsControl>
             </Viewbox>
         </DockPanel>

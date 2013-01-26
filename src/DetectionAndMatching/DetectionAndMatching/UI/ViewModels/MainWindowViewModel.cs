@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DetectionAndMatching.UI.Models;
+using DetectionAndMatching.UI.Views;
 
 namespace DetectionAndMatching.UI.ViewModels
 {
@@ -17,10 +18,12 @@ namespace DetectionAndMatching.UI.ViewModels
     {
         private FeaturesDoc _doc;
         private string _dirLocation;
+        MainWindow _yuck;
 
-        public MainWindowViewModel(FeaturesDoc incomingDoc)
+        public MainWindowViewModel(FeaturesDoc incomingDoc, MainWindow yuck)
         {
             _doc = incomingDoc;
+            _yuck = yuck;
 
           //  LeftPictureLocation = @"C:\Users\Trevor\Downloads\angrytree.jpg";
             //_doc.load_query_image(LeftPictureLocation);
@@ -46,6 +49,20 @@ namespace DetectionAndMatching.UI.ViewModels
 
             //LeftCollection.Add(m1);
             //LeftCollection.Add(m2);
+        }
+        public void SelectAllFeaturesAt(double X, double Y)
+        {
+            if (_doc.queryFeatures != null)
+            {
+                _doc.queryFeatures.select_point(X, Y);
+            }
+        }
+        public void SelectAllFeaturesInArea(double xMin, double xMax, double yMin, double yMax)
+        {
+            if (_doc.queryFeatures != null)
+            {
+                _doc.queryFeatures.select_box(xMin, xMax, yMin, yMax);
+            }
         }
 
         public ObservableCollection<IItemViewModel> LeftCollection { get; private set; }
@@ -197,6 +214,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
                 LeftImageHeight = bi.PixelHeight;
                 LeftImageWidth = bi.PixelWidth;
+                _yuck.MenuItem_Click_1(null, null);
             }
         }
 
