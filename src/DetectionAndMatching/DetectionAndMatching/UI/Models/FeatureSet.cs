@@ -170,6 +170,7 @@ struct FeatureMatch {
             // They give row first, then column.
             x = (int) (ySub + 0.5);
             y = (int) (xSub + 0.5);
+            angleRadians = rotation;
 
             //data.resize(128);
             data.Capacity = 128;

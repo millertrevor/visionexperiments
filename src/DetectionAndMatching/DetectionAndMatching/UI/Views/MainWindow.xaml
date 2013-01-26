@@ -92,7 +92,9 @@
                     <MenuItem Header="_Toggle Features"></MenuItem>
                 </MenuItem>
                 <MenuItem Header="_Help">
-                    <MenuItem Header="_About"></MenuItem>
+                    <MenuItem Header="_About">
+                        <Button Click="Button_Click_1">pause</Button>
+                    </MenuItem>
                 </MenuItem>
             </Menu>
        
@@ -123,14 +125,14 @@
                        <!-->-->
                      
                 <!--</Image>-->
-            <Viewbox DockPanel.Dock="Left">
+            <Viewbox x:Name="leftViewBox" DockPanel.Dock="Left">
                 <!--Width="{Binding Width, ElementName=image}" Height="{Binding Height, ElementName=image}"-->
                 <ItemsControl x:Name="leftItemsControl"  ItemsSource="{Binding LeftCollection}" Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}">
 
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <!--Width="{Binding Width, ElementName=image}" Height="{Binding Height, ElementName=image}"-->
-                        <Canvas  >
+                        <Canvas x:Name="leftCanvas" >
                                     <Canvas.Background>
                                         <ImageBrush Stretch="Uniform" ImageSource="{Binding LeftPictureLocation}"/>
                                     </Canvas.Background>
@@ -140,23 +142,23 @@
 
                 <ItemsControl.ItemTemplate>
                 <DataTemplate DataType="{x:Type models:Feature}">
-                    <Rectangle StrokeThickness="1"  Stroke="{Binding Color}" Width="{Binding Width}" Height="{Binding Height}"
-                       Canvas.Left="{Binding Left}" Canvas.Top="{Binding Top}"/>
-                            <!--<Grid Width="{Binding Width, ElementName=leftItemsControl}" Height="{Binding Height, ElementName=leftItemsControl}">
+                    <!--<Rectangle StrokeThickness="1"  Stroke="{Binding Color}" Width="{Binding Width}" Height="{Binding Height}"
+                       Canvas.Left="{Binding Left}" Canvas.Top="{Binding Top}"/>-->
+                            <Grid >
                     <Line X1="{Binding X1}" Y1="{Binding Y1}" X2="{Binding X2}" Y2="{Binding Y2}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             <Line X1="{Binding X2}" Y1="{Binding Y2}" X2="{Binding X3}" Y2="{Binding Y3}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             <Line X1="{Binding X3}" Y1="{Binding Y3}" X2="{Binding X4}" Y2="{Binding Y4}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             <Line X1="{Binding X4}" Y1="{Binding Y4}" X2="{Binding X1}" Y2="{Binding Y1}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
                             <Line X1="{Binding X}" Y1="{Binding Y}" X2="{Binding X5}" Y2="{Binding Y5}" StrokeThickness="1" Stroke="{Binding Color}"></Line>
-                            </Grid>-->
+                            </Grid>
                         </DataTemplate>
             </ItemsControl.ItemTemplate>
-                <ItemsControl.ItemContainerStyle>
+                <!--<ItemsControl.ItemContainerStyle>
                     <Style TargetType="ContentPresenter">
                         <Setter Property="Canvas.Left" Value="{Binding Path=Left}" />
                         <Setter Property="Canvas.Top" Value="{Binding Path=Top}" />
                     </Style>
-                </ItemsControl.ItemContainerStyle>
+                </ItemsControl.ItemContainerStyle>-->
             </ItemsControl>
             </Viewbox>
             <!--//fl_line(x1, y1, x2, y2);

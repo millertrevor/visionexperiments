@@ -29,5 +29,12 @@ namespace DetectionAndMatching.UI.Views
             this.DataContext = new MainWindowViewModel(doc);
            
         }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            var viewBox = this.leftViewBox;
+            var itemsControl = this.leftItemsControl;
+            int stop = -1;
+        }
     }
 }
