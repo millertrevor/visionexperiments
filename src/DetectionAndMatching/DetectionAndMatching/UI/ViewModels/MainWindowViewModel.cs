@@ -30,22 +30,22 @@ namespace DetectionAndMatching.UI.ViewModels
 
          
             LeftCollection = new ObservableCollection<IItemViewModel>();
-            ItemViewModel m1 = new ItemViewModel();
-            m1.Top = 1;
-            m1.Left = 1;
-            m1.Height = 10;
-            m1.Width = 10;
-            m1.Color = Brushes.Black;
+            //ItemViewModel m1 = new ItemViewModel();
+            //m1.Top = 1;
+            //m1.Left = 1;
+            //m1.Height = 10;
+            //m1.Width = 10;
+            //m1.Color = Brushes.Black;
 
-            ItemViewModel m2 = new ItemViewModel();
-            m2.Top = 50;
-            m2.Left = 50;
-            m2.Height = 30;
-            m2.Width = 30;
-            m2.Color = Brushes.Red;
+            //ItemViewModel m2 = new ItemViewModel();
+            //m2.Top = 50;
+            //m2.Left = 50;
+            //m2.Height = 30;
+            //m2.Width = 30;
+            //m2.Color = Brushes.Red;
 
-            LeftCollection.Add(m1);
-            LeftCollection.Add(m2);
+            //LeftCollection.Add(m1);
+            //LeftCollection.Add(m2);
         }
 
         public ObservableCollection<IItemViewModel> LeftCollection { get; private set; }
@@ -293,17 +293,17 @@ namespace DetectionAndMatching.UI.ViewModels
         }
     }
 
-    public class ItemViewModel
-        : IItemViewModel
-    {
-        public double Left { get; set; }
-        public double Top { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public SolidColorBrush Color { get; set; }
+    //public class ItemViewModel
+    //    : IItemViewModel
+    //{
+    //    public double Left { get; set; }
+    //    public double Top { get; set; }
+    //    public double Width { get; set; }
+    //    public double Height { get; set; }
+    //    public SolidColorBrush Color { get; set; }
 
-        // whatever you need...
-    }
+    //    // whatever you need...
+    //}
 
     public interface IItemViewModel
     {
@@ -312,6 +312,18 @@ namespace DetectionAndMatching.UI.ViewModels
          double Width { get; set; }
          double Height { get; set; }
          SolidColorBrush Color { get; set; }
+        int X1 { get; set; }
+        int Y1 { get; set; }
+        int X2 { get; set; }
+        int Y2 { get; set; }
+        int X3 { get; set; }
+        int Y3 { get; set; }
+        int X4 { get; set; }
+        int Y4 { get; set; }
+        int X5 { get; set; }
+        int Y5 { get; set; }
+        int X { get; set; }
+        int Y { get; set; }
     }
 
     public class CollectionViewModel

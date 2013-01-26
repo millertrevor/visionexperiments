@@ -27,8 +27,8 @@ struct FeatureMatch {
 
         public int type;
         public int id;
-        public int x;
-        public int y;
+        private int x;
+        private int y;
         public double angleRadians;
 
         private List<double> data = new List<double>();
@@ -59,6 +59,16 @@ struct FeatureMatch {
             }
         }
 
+        private int _x1;
+        private int _y1;
+        private int _x2;
+        private int _y2;
+        private int _x3;
+        private int _y3;
+        private int _x4;
+        private int _y4;
+        private int _x5;
+        private int _y5;
         // Draw the feature, currently as a square.
         // Draw a feature.  Currently, this just draws a green box for selected
         // features, and a red box for unselected features.
@@ -67,7 +77,7 @@ struct FeatureMatch {
             Color = selected ? Brushes.Green : Brushes.Red;
 
             // fl_rect(x-3, y-3, 7, 7);
-            int x1, y1, x2, y2, x3, y3, x4, y4, x5, y5;
+           
 
             var d1 = new double[] { 5.0, 5.0 };
             var d2 = new double[] { 5.0, -5.0 };
@@ -78,35 +88,35 @@ struct FeatureMatch {
             double s = Math.Sin(angleRadians);
             double c = Math.Cos(angleRadians);
 
-            x1 = iround(x + (d1[0] * c - d1[1] * s));
-            y1 = iround(y + (d1[0] * s + d1[1] * c));
+            _x1 = iround(x + (d1[0] * c - d1[1] * s));
+            _y1 = iround(y + (d1[0] * s + d1[1] * c));
 
-            x2 = iround(x + (d2[0] * c - d2[1] * s));
-            y2 = iround(y + (d2[0] * s + d2[1] * c));
+            _x2 = iround(x + (d2[0] * c - d2[1] * s));
+            _y2 = iround(y + (d2[0] * s + d2[1] * c));
 
-            x3 = iround(x + (d3[0] * c - d3[1] * s));
-            y3 = iround(y + (d3[0] * s + d3[1] * c));
+            _x3 = iround(x + (d3[0] * c - d3[1] * s));
+            _y3 = iround(y + (d3[0] * s + d3[1] * c));
 
-            x4 = iround(x + (d4[0] * c - d4[1] * s));
-            y4 = iround(y + (d4[0] * s + d4[1] * c));
+            _x4 = iround(x + (d4[0] * c - d4[1] * s));
+            _y4 = iround(y + (d4[0] * s + d4[1] * c));
 
-            x5 = iround(x + (d5[0] * c - d5[1] * s));
-            y5 = iround(y + (d5[0] * s + d5[1] * c));
+            _x5 = iround(x + (d5[0] * c - d5[1] * s));
+            _y5 = iround(y + (d5[0] * s + d5[1] * c));
 
-            var xm1 = Math.Max(x1, x2);
-            var xm2 = Math.Max(x3, x4);
+            var xm1 = Math.Max(_x1, _x2);
+            var xm2 = Math.Max(_x3, _x4);
             var maxX = Math.Max(xm1, xm2);
 
-            var ym1 = Math.Max(y1, y2);
-            var ym2 = Math.Max(y3, y4);
+            var ym1 = Math.Max(_y1, _y2);
+            var ym2 = Math.Max(_y3, _y4);
             var yMax = Math.Max(ym1, ym2);
 
-            var xmin1 = Math.Min(x1, x2);
-            var xmin2 = Math.Min(x3, x4);
+            var xmin1 = Math.Min(_x1, _x2);
+            var xmin2 = Math.Min(_x3, _x4);
             var minX = Math.Min(xmin1, xmin2);
 
-            var ymin1 = Math.Min(y1, y2);
-            var ymin2 = Math.Min(y3, y4);
+            var ymin1 = Math.Min(_y1, _y2);
+            var ymin2 = Math.Min(_y3, _y4);
             var yMin = Math.Min(ymin1, ymin2);
 
             Width = maxX - minX;
@@ -210,6 +220,78 @@ struct FeatureMatch {
         {
             get { return _color; }
             set { _color = value; }
+        }
+
+        public int X1
+        {
+            get { return _x1; }
+            set { _x1 = value; }
+        }
+
+        public int Y1
+        {
+            get { return _y1; }
+            set { _y1 = value; }
+        }
+
+        public int X2
+        {
+            get { return _x2; }
+            set { _x2 = value; }
+        }
+
+        public int Y2
+        {
+            get { return _y2; }
+            set { _y2 = value; }
+        }
+
+        public int X3
+        {
+            get { return _x3; }
+            set { _x3 = value; }
+        }
+
+        public int Y3
+        {
+            get { return _y3; }
+            set { _y3 = value; }
+        }
+
+        public int X4
+        {
+            get { return _x4; }
+            set { _x4 = value; }
+        }
+
+        public int Y4
+        {
+            get { return _y4; }
+            set { _y4 = value; }
+        }
+
+        public int X5
+        {
+            get { return _x5; }
+            set { _x5 = value; }
+        }
+
+        public int Y5
+        {
+            get { return _y5; }
+            set { _y5 = value; }
+        }
+
+        public int X
+        {
+            get { return x; }
+            set { x = value; }
+        }
+
+        public int Y
+        {
+            get { return y; }
+            set { y = value; }
         }
     }
 
