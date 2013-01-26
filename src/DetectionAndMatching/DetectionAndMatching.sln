@@ -5,6 +5,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DetectionAndMatching", "Det
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageLib", "ImageLib\ImageLib.csproj", "{268D5926-E506-4074-B6BF-55496D43E2AA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PixelMap", "PixelMap\PixelMap.csproj", "{F49501E5-9316-41BB-A70A-31F6AB6A5227}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +21,10 @@ Global
 		{268D5926-E506-4074-B6BF-55496D43E2AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{268D5926-E506-4074-B6BF-55496D43E2AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{268D5926-E506-4074-B6BF-55496D43E2AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F49501E5-9316-41BB-A70A-31F6AB6A5227}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F49501E5-9316-41BB-A70A-31F6AB6A5227}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F49501E5-9316-41BB-A70A-31F6AB6A5227}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F49501E5-9316-41BB-A70A-31F6AB6A5227}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

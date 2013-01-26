@@ -10,32 +10,25 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using DetectionAndMatching.UI.Models;
+using PixelMap;
 
 namespace DetectionAndMatching.UI.ViewModels
 {
     public class MainWindowViewModel : INotifyPropertyChanged
     {
-        //private FeaturesDoc _doc;
         private string _dirLocation;
         bool _showingFeatures = true;
 
 
         private string _queryImage;
-        public FeatureSet _queryFeatures; //*
+        public FeatureSet _queryFeatures; 
 
-        private ImageDatabase db; //*
+        private ImageDatabase db;
 
-        //private Fl_Shared_Image *resultImage;
+        private string _resultImage;
 
         private int matchType;
-
         
-        public MainWindowViewModel()
-        {
-            //_doc = incomingDoc;           
-            
-          //  LeftCollection = new ObservableCollection<IFeature>();           
-        }
         public void SelectAllFeaturesAt(double X, double Y)
         {
             if (QueryFeatures != null)
@@ -50,8 +43,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 QueryFeatures.select_box(xMin, xMax, yMin, yMax);
             }
         }
-
-      //  public ObservableCollection<IFeature> LeftCollection { get; private set; }
+        
         public FeatureSet QueryFeatures
         {
             get { return _queryFeatures; }
@@ -160,6 +152,11 @@ namespace DetectionAndMatching.UI.ViewModels
             {
                 // Open document 
                 string filename = dlg.FileName;
+                System.IO.FileInfo fi = new System.IO.FileInfo(filename);
+                if (fi.Extension == ".ppm")
+                {
+                    filename = ConvertToJpeg(fi);
+                }
                 _dirLocation = dlg.InitialDirectory;
                // _doc.load_query_image(filename);
                 LeftPictureLocation = filename;
@@ -169,7 +166,12 @@ namespace DetectionAndMatching.UI.ViewModels
                 LeftImageWidth = bi.PixelWidth;                
             }
         }
+        private string ConvertToJpeg(System.IO.FileInfo incomingInfo)
+        {
+            PixelMap.PixelMap pm = new PixelMap.PixelMap(incomingInfo.FullName);
 
+            return pm.SaveBitmapAsJpeg(incomingInfo);
+        }
         private ICommand _loadQueryFeaturesSIFT;
         public ICommand LoadQueryFeaturesSIFT
         {
@@ -311,31 +313,17 @@ namespace DetectionAndMatching.UI.ViewModels
             }
             else
             {
-                //   ui->set_images(queryImage, NULL);
-                // ui->set_features(NULL, NULL);
-
-
                 QueryFeatures = null;
 
-                // Delete the current result image.
-                //if (resultImage != null)
-                //{
-                //    resultImage->release();
-                //    resultImage = NULL;
-                //}
+                // Delete the current result image.                
+                _resultImage = string.Empty;
 
                 QueryFeatures = new FeatureSet();
 
                 // Load the feature set.
                 if (((!sift) && (QueryFeatures.load(fileName))) || ((sift) && (QueryFeatures.load_sift(fileName))))
                 {
-                   // LeftCollection.Clear();
-                   // foreach (var item in queryFeatures)
-                   // {
-
-                       // item.draw();
-                      //  LeftCollection.Add(item);
-                   // }
+                  //might have to link the feature set to the Image that will be used for actual processing
                 }
                 else
                 {

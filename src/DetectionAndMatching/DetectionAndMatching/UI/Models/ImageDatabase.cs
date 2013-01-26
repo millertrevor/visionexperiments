@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace DetectionAndMatching.UI.Models
 {
@@ -24,8 +25,21 @@ class ImageDatabase : List<DatabaseItem> {
 	}
 
 	// Load a database from file.
-	public bool load(/*const char *name,*/ bool sift)
+    // Load a database from file.  The database file contains a list of
+    // image file names and feature file names.  Each image file name is
+    // followed by the corresponding feature file name.  The file names in
+    // the database must be relative to the database path or it won't work.
+    // I apologize for this annoyance.
+	public bool load(string fileName, bool sift)
 	{
+        DatabaseItem d;
+        string s;
+        // Clear all entries from the database.
+        this.Clear();
+
+        using (TextReader reader = File.OpenText(fileName))
+        {
+        }
 	    return false;
 	}
 }
