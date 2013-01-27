@@ -244,7 +244,7 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
 
-          private ICommand _toggleFeaturesCommand;
+        private ICommand _toggleFeaturesCommand;
         public ICommand ToggleFeatures
         {
             get
@@ -279,6 +279,34 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
 
+         private ICommand _loadDataBaseCommand;
+        public ICommand LoadDataBaseCommand
+        {
+            get
+            {
+                return _loadDataBaseCommand ??
+                       (_loadDataBaseCommand =
+                        new RelayCommand(param => LoadDataBaseExecute((string)param), param => LoadDataBaseEnabled));
+            }
+        }
+         private bool _loadDataBaseEnabled = true;
+        public bool LoadDataBaseEnabled
+        {
+            get { return _loadDataBaseEnabled; }
+            set { _loadDataBaseEnabled = value; }
+        }
+
+        private void LoadDataBaseExecute(string type)
+        {
+            if (type == "SIFT")
+            {
+                LoadSiftDatabase();
+            }
+            else
+            {
+                LoadDataBase();
+            }
+        }
         private ICommand _exitCommand;
         public ICommand ExitCommand
         {
@@ -332,6 +360,54 @@ namespace DetectionAndMatching.UI.ViewModels
                 }
             }
         }
+        private void LoadSiftDatabase()
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".kdb";
+            dlg.Filter = "Database Files (*.kdb)|*.kdb";
+            if (string.IsNullOrEmpty(_dirLocation))
+            {
+                dlg.InitialDirectory = Environment.CurrentDirectory;
+            }
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            bool? result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = dlg.FileName;
+                _dirLocation = dlg.InitialDirectory;
+                load_image_database(filename, true);
+            }
+        }
+        private void LoadDataBase()
+        {
+            var dlg = new Microsoft.Win32.OpenFileDialog();
+
+            // Set filter for file extension and default file extension 
+            dlg.DefaultExt = ".db";
+            dlg.Filter = "Database Files (*.db)|*.db";
+            if (string.IsNullOrEmpty(_dirLocation))
+            {
+                dlg.InitialDirectory = Environment.CurrentDirectory;
+            }
+
+            // Display OpenFileDialog by calling ShowDialog method 
+            bool? result = dlg.ShowDialog();
+
+            // Get the selected file name and display in a TextBox 
+            if (result == true)
+            {
+                // Open document 
+                string filename = dlg.FileName;
+                _dirLocation = dlg.InitialDirectory;
+                load_image_database(filename, false);
+            }
+        }
         public void load_image_database(string fileName, bool sift)
         {
             //ui->set_images(queryImage, NULL);
@@ -341,7 +417,7 @@ namespace DetectionAndMatching.UI.ViewModels
             //if (db != NULL)
             //{
             //    delete db;
-            //    db = NULL;
+            db = null;
             //}
 
             //// Delete the current result image.
@@ -350,17 +426,16 @@ namespace DetectionAndMatching.UI.ViewModels
             //    resultImage->release();
             //    resultImage = NULL;
             //}
+            _resultImage = string.Empty;
 
-            //db = new ImageDatabase();
+            db = new ImageDatabase();
 
             //// Load the database.
-            //if (!db->load(name, sift))
-            //{
-            //    delete db;
-            //    db = NULL;
-
-            //    fl_alert("couldn't load database");
-            //}
+            if (!db.load(fileName, sift))
+            {
+                db = null;
+                MessageBox.Show("Couldn't load database");
+            }
 
             //ui->refresh();
         }

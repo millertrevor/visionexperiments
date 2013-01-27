@@ -11,8 +11,8 @@ namespace DetectionAndMatching.UI.Models
 // A DatabaseItem holds the name of an image, and the corresponding
 // feature set.  The images themselves are not stored in memory.
 struct DatabaseItem {
-	string name;
-	FeatureSet features;
+	public string name;
+	public FeatureSet features;
 };
 
 // The ImageDatabase class is a vector of database items.
@@ -32,15 +32,39 @@ class ImageDatabase : List<DatabaseItem> {
     // I apologize for this annoyance.
 	public bool load(string fileName, bool sift)
 	{
-        DatabaseItem d;
-        string s;
+        var dirString = new System.IO.FileInfo(fileName).Directory.FullName + Path.DirectorySeparatorChar;
+      
         // Clear all entries from the database.
         this.Clear();
 
         using (TextReader reader = File.OpenText(fileName))
         {
+            string allFiles = reader.ReadToEnd();
+            allFiles = allFiles.Trim();
+            var parsed = allFiles.Split(new string[] { Environment.NewLine, " " }, StringSplitOptions.None);
+            for (int i = 0; i < parsed.Length; i++)
+            {
+                DatabaseItem d;
+                d.features = new FeatureSet();
+                string s;
+
+                var imageFile = parsed[i];
+                i++;
+                var featureFile = parsed[i];
+
+                d.name =dirString+ imageFile;
+                s =dirString+ featureFile;
+                if (((!sift) && (!d.features.load(s))) || ((sift) && (!d.features.load_sift(s))))
+                {
+                    Clear();
+                   // f.close();
+                    return false;
+                }
+                Add(d);
+            }
+           
         }
-	    return false;
+	    return true;
 	}
 }
 

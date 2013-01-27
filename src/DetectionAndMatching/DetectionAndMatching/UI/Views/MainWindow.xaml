@@ -25,8 +25,8 @@
                         <MenuItem Header="_SIFT" Command="{Binding LoadQueryFeaturesSIFT}"></MenuItem>
                     </MenuItem>
                     <MenuItem Header="_Load Image Database">
-                        <MenuItem Header="_Normal"></MenuItem>
-                        <MenuItem Header="_SIFT"></MenuItem>
+                        <MenuItem Header="_Normal" Command="{Binding LoadDataBaseCommand}" CommandParameter="Normal"></MenuItem>
+                        <MenuItem Header="_SIFT" Command="{Binding LoadDataBaseCommand}" CommandParameter="SIFT"></MenuItem>
                     </MenuItem>
                     <MenuItem Header="_Exit" Command="{Binding ExitCommand}"></MenuItem>
                 </MenuItem>
