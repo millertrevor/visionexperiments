@@ -19,7 +19,7 @@ namespace DetectionAndMatching
         protected override void OnStartup(StartupEventArgs e)
         {
             //e.Args is the string[] of command line argruments
-            var reader = new ImageReader.ImageReader("test.jpg");
+          //  var reader = new ImageReader.ImageReader("test.jpg");
 
          //   reader.SampleCode();
             if (e.Args.Length > 0)
@@ -180,7 +180,7 @@ namespace DetectionAndMatching
                 }
             }
 
-            return true;
+           return true;
         }
 
 
