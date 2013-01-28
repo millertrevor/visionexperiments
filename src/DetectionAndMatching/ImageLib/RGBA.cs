@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace ImageLib
 {
-    public class Class1
+    public struct RGBA
     {
+        public PixType B, G, R, A;
     }
 }

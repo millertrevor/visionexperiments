@@ -100,6 +100,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\ImageLib\ImageLib.csproj">
+      <Project>{268d5926-e506-4074-b6bf-55496d43e2aa}</Project>
+      <Name>ImageLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ImageReader\ImageReader.csproj">
+      <Project>{dfb90ad7-7af2-4e86-a420-2e017b4ba3e0}</Project>
+      <Name>ImageReader</Name>
+    </ProjectReference>
     <ProjectReference Include="..\PixelMap\PixelMap.csproj">
       <Project>{f49501e5-9316-41bb-a70a-31f6ab6a5227}</Project>
       <Name>PixelMap</Name>
