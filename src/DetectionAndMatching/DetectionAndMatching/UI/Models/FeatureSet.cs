@@ -18,10 +18,10 @@ namespace DetectionAndMatching.UI.Models
     // FeatureMatch is used by your feature matching routine to store the
     // ID of the matching feature in the other image, as well as the score
     // of the match.
-    struct FeatureMatch
+    public struct FeatureMatch
     {
-        int id1, id2;
-        double score;
+        public int id1, id2;
+        public double score;
     };
 
 
@@ -75,7 +75,7 @@ namespace DetectionAndMatching.UI.Models
                 {
                     var feature = new Feature();
                     feature.read_sift(reader);
-                    feature.id = id;
+                    feature.Id = id;
                     id++;
                     feature.Draw();
                     Add(feature);

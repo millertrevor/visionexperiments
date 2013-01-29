@@ -17,7 +17,7 @@ namespace DetectionAndMatching.UI.Models
     {
 
         public int type;
-        public int id;
+        private int id;
         private int x;
         private int y;
         public double angleRadians;
@@ -173,6 +173,15 @@ namespace DetectionAndMatching.UI.Models
             }
         }
 
+        public List<double> Data
+        {
+            get { return data; }
+        }
+        public int Id
+        {
+            get { return id; }
+            set { id = value; }
+        }
         public double Left
         {
             get { return _left; }

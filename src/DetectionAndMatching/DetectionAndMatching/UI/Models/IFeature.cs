@@ -9,6 +9,8 @@ namespace DetectionAndMatching.UI.Models
 {
     public interface IFeature
     {
+        List<double> Data { get; }
+        int Id { get; set; }
         double Left { get; set; }
         double Top { get; set; }
         double Width { get; set; }
