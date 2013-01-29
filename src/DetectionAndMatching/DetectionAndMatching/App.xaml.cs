@@ -90,8 +90,9 @@ namespace DetectionAndMatching
         }
 
 
-        bool LoadImageFile(string filename, CImageOfFloat image)
+        CImageOfFloat LoadImageFile(string filename)//this won't work in C# land, CImageOfFloat image)
         {
+            CImageOfFloat image = null;
             // Load the query image.
             //Fl_Shared_Image *fl_image = Fl_Shared_Image::get(filename);
             var fl_image = new ImageReader.ImageReader(filename);
@@ -109,7 +110,7 @@ namespace DetectionAndMatching
                 //convertToFloatImage(byteImage, image);
 
                 //return true;
-                return false;//Until we figure out hte fall back with FileIO
+                return null;//Until we figure out hte fall back with FileIO
             }
             else
             {
@@ -120,10 +121,10 @@ namespace DetectionAndMatching
                 if (!convertImage(fl_image, image))
                 {
                     Console.WriteLine("Couldn't convert image to RGB format\n");
-                    return false;
+                    return null;
                 }
 
-                return true;
+                return image;
             }
         }
 
@@ -241,7 +242,7 @@ namespace DetectionAndMatching
 
                         // We have to flip the image and reverse the color
                         // channels to get it to come out right.  How silly!
-                        floatImage.SetPixel(x, sh.height - y - 1, Math.Min(3, sh.nBands) - c - 1,value);
+                        floatImage.SetPixel(x, sh.height - y - 1, Math.Min(3, sh.nBands) - c - 1, value);
                         //item = value;
                         //TODO: i think value needs to be set at the Pixel location in the float Image
                         //I dont' think it is done currently
@@ -273,10 +274,10 @@ namespace DetectionAndMatching
             }
 
             CImageOfFloat floatQueryImage = null;
-            bool success = false;
-            success = LoadImageFile(argv[1], floatQueryImage);
+            //bool success = false;
+            floatQueryImage = LoadImageFile(argv[1]);//, floatQueryImage);
 
-            if (!success)
+            if (floatQueryImage == null)
             {
                 Console.WriteLine("Couldn't load query image\n");
                 return -1;
@@ -347,10 +348,10 @@ namespace DetectionAndMatching
                         f.X = x;
                         f.Y = y;
 
-                       // f.Data.resize(1);
+                        // f.Data.resize(1);
                         f.Data.Add(r + g + b);
 
-                       // features.push_back(f);
+                        // features.push_back(f);
                         features.Add(f);
                     }
                 }
@@ -358,54 +359,56 @@ namespace DetectionAndMatching
         }
 
         void ComputeHarrisFeatures(CImageOfFloat image, FeatureSet features)
-{
-	//Create grayscale image used for Harris detection
-	var grayImage=(CImageOfFloat)ConvertToGray(image);
+        {
+            //Create grayscale image used for Harris detection
+            var grayImage = (CImageOfFloat)ConvertToGray(image);
 
-	//Create image to store Harris values
-	CImageOfFloat harrisImage = new CImageOfFloat(image.Shape().width,image.Shape().height,1);
+            //Create image to store Harris values
+            CImageOfFloat harrisImage = new CImageOfFloat(image.Shape().width, image.Shape().height, 1);
 
-	//Create image to store local maximum harris values as 1, other pixels 0
-	CImageOfByte harrisMaxImage = new CImageOfByte(image.Shape().width,image.Shape().height,1);
+            //Create image to store local maximum harris values as 1, other pixels 0
+            CImageOfByte harrisMaxImage = new CImageOfByte(image.Shape().width, image.Shape().height, 1);
 
-	
-	//compute Harris values puts harris values at each pixel position in harrisImage. 
-	//You'll need to implement this function.
-    computeHarrisValues(grayImage, harrisImage);
-	
-	// Threshold the harris image and compute local maxima.  You'll need to implement this function.
-	computeLocalMaxima(harrisImage,harrisMaxImage);
 
-    
-    // Prints out the harris image for debugging purposes
-	CImageOfByte tmp = new CImageOfByte(harrisImage.Shape());
-	convertToByteImage(harrisImage, tmp);
-    WriteFile(tmp, "harris.tga");
-    
+            //compute Harris values puts harris values at each pixel position in harrisImage. 
+            //You'll need to implement this function.
+            computeHarrisValues(grayImage, harrisImage);
 
-	// TO DO--------------------------------------------------------------------
-	//Loop through feature points in harrisMaxImage and create feature descriptor 
-	//for each point above a threshold
+            // Threshold the harris image and compute local maxima.  You'll need to implement this function.
+            computeLocalMaxima(harrisImage, harrisMaxImage);
 
-    for (int y=0;y<harrisMaxImage.Shape().height;y++) {
-		for (int x=0;x<harrisMaxImage.Shape().width;x++) {
-		
-			// Skip over non-maxima
-            if (harrisMaxImage.GetPixel(x, y, 0) == 0)
-                continue;
 
-		    
+            // Prints out the harris image for debugging purposes
+            CImageOfByte tmp = new CImageOfByte(harrisImage.Shape());
+            convertToByteImage(harrisImage, tmp);
+            WriteFile(tmp, "harris.tga");
 
-            //TO DO---------------------------------------------------------------------
-		    // Fill in feature with descriptor data here. 
-            Feature f = new Feature();
 
-            // Add the feature to the list of features
-            //features.push_back(f);
-            features.Add(f);
+            // TO DO--------------------------------------------------------------------
+            //Loop through feature points in harrisMaxImage and create feature descriptor 
+            //for each point above a threshold
+
+            for (int y = 0; y < harrisMaxImage.Shape().height; y++)
+            {
+                for (int x = 0; x < harrisMaxImage.Shape().width; x++)
+                {
+
+                    // Skip over non-maxima
+                    if (harrisMaxImage.GetPixel(x, y, 0) == 0)
+                        continue;
+
+
+
+                    //TO DO---------------------------------------------------------------------
+                    // Fill in feature with descriptor data here. 
+                    Feature f = new Feature();
+
+                    // Add the feature to the list of features
+                    //features.push_back(f);
+                    features.Add(f);
+                }
+            }
         }
-	}
-}
 
 
 
@@ -477,12 +480,7 @@ namespace DetectionAndMatching
             int m = f1.Count;
             int n = f2.Count;
 
-            //matches.resize(m);
             matches = new List<FeatureMatch>();
-            //for (int i = 0; i < m; i++)
-            //{
-            //    matches.Add(new FeatureMatch());
-            //}
             totalScore = 0;
 
             double d;
@@ -505,9 +503,6 @@ namespace DetectionAndMatching
                     }
                 }
 
-                //matches[i].id1 = f1[i].Id;
-                //matches[i].id2 = idBest;
-                //matches[i].score = dBest;
                 FeatureMatch match = new FeatureMatch();
                 match.id1 = f1[i].Id;
                 match.id2 = idBest;
@@ -531,76 +526,87 @@ namespace DetectionAndMatching
 
 
         //template <class T>//CImageOf<T>
-CImageOf<T> ConvertToGray<T>(CImageOf<T> src)
-{
-    // Check if already gray
-    CShape sShape = src.Shape();
-    if (sShape.nBands == 1)
-        return src;
+        CImageOf<T> ConvertToGray<T>(CImageOf<T> src)
+        {
+            // Check if already gray
+            CShape sShape = src.Shape();
+            if (sShape.nBands == 1)
+                return src;
 
-//#if 0
-//    // Make sure the source is a color image
-//    if (sShape.nBands != 4 || src.alphaChannel != 3)
-//        throw CError("ConvertToGray: can only convert from 4-band (RGBA) image");
-//#else
-    // Make sure the source is a color image
-    if (sShape.nBands != 3)
-        throw new Exception("ConvertToGray: can only convert from 3-band (RGB) image");
-//#endif
+            //#if 0
+            //    // Make sure the source is a color image
+            //    if (sShape.nBands != 4 || src.alphaChannel != 3)
+            //        throw CError("ConvertToGray: can only convert from 4-band (RGBA) image");
+            //#else
+            // Make sure the source is a color image
+            if (sShape.nBands != 3)
+                throw new Exception("ConvertToGray: can only convert from 3-band (RGB) image");
+            //#endif
 
-    // Allocate the new image
-    CShape dShape = new CShape(sShape.width, sShape.height, 1);
-    CImageOf<T> dst = new CImageOf<T>(src.MinVal(),src.MaxVal(),dShape);
+            // Allocate the new image
+            CShape dShape = new CShape(sShape.width, sShape.height, 1);
+            CImageOf<T> dst = new CImageOf<T>(src.MinVal(), src.MaxVal(), dShape);
 
-    // Process each row
-    var minVal = dst.MinVal();
-    var maxVal = dst.MaxVal();
-    for (int y = 0; y < sShape.height; y++)
-    {
-        //T* srcP = &src.Pixel(0, y, 0);
-        //T* dstP = &dst.Pixel(0, y, 0);
-        //for (int x = 0; x < sShape.width; x++, srcP += 3/*4*/, dstP++)
-        //{
-        //    RGBA<T>& p = *(RGBA<T> *) srcP;
-        //    float Y = 0.212671f * p.R + 0.715160f * p.G + 0.072169f * p.B;
-        //    *dstP = (T) __min(maxVal, __max(minVal, Y));
-        //}
-    }
-    return dst;
-}
+            // Process each row
+            var minVal = dst.MinVal();
+            var maxVal = dst.MaxVal();
+            for (int y = 0; y < sShape.height; y++)
+            {
+                var srcP = src.GetPixel(0, y, 0);
+                var dstP = dst.GetPixel(0, y, 0);
+                for (int x = 0; x < sShape.width; x++, srcP += 3/*4*/, dstP++)
+                {
+                    //Ok more c++ template magic.
+                    //Somehow we can grab the whole pixel RGBA and all.
+                    //THen used the templated class/struct THING to access each pixel individually to do the transformation
+                    //Wow this sucks. How am i going to do this in c#
+                    //Guess i can git rid of that stupid RGBA class because that ain't gonna work!
+                    //RGBA<T> p = *(RGBA<T>*)srcP;
+                    //float Y = 0.212671f * p.R + 0.715160f * p.G + 0.072169f * p.B;
+                    //dstP = Math.Min(maxVal, Math.Max(minVal, Y));
+                    ////RGBA < T > &p = *(RGBA<T>*)srcP;
+                    ////float Y = 0.212671f * p.R + 0.715160f * p.G + 0.072169f * p.B;
+                    ////*dstP = (T)__min(maxVal, __max(minVal, Y));
+                    //TODO: WOW FIGURE THIS MESS OUT
+                }
+            }
+            throw new NotImplementedException("Wow look up above in this method, how are we going to convert this mess");
+            return dst;
+        }
 
 
-void WriteFile(CImage img, string filename)
-{
-    // Determine the file extension
-    //const char *dot = strrchr(filename, '.');
-    string dot = new System.IO.FileInfo(filename).Extension;
-    if (string.Equals(dot, ".tga") || string.Equals(dot, ".tga"))
-    {
-        if (img.PixType() == typeof(byte))
-            WriteFileTGA(img, filename);
-        else
-            throw new Exception(string.Format("ReadFile({0}): haven't implemented conversions yet", filename));
-    }
-    else
-        throw new Exception(string.Format("WriteFile({0}): file type not supported", filename));
-}
+        void WriteFile(CImage img, string filename)
+        {
+            // Determine the file extension
+            //const char *dot = strrchr(filename, '.');
+            string dot = new System.IO.FileInfo(filename).Extension;
+            if (string.Equals(dot, ".tga") || string.Equals(dot, ".tga"))
+            {
+                if (img.PixType() == typeof(byte))
+                    WriteFileTGA(img, filename);
+                else
+                    throw new Exception(string.Format("ReadFile({0}): haven't implemented conversions yet", filename));
+            }
+            else
+                throw new Exception(string.Format("WriteFile({0}): file type not supported", filename));
+        }
 
         public struct CTargaHead
-{
-    public byte idLength;     // number of chars in identification field
-    public byte colorMapType;	// color map type
-    public byte imageType;	// image type code
-    public byte[] cMapOrigin;// color map origin // 2
-    public byte[] cMapLength;// color map length // 2
-    public byte cMapBits;     // color map entry size
-    public short x0;			// x-origin of image
-    public short y0;			// y-origin of image
-    public short width;		// width of image
-    public short height;		// height of image
-    public byte pixelSize;    // image pixel size
-    public byte descriptor;   // image descriptor byte
+        {
+            public byte idLength;     // number of chars in identification field
+            public byte colorMapType;	// color map type
+            public byte imageType;	// image type code
+            public byte[] cMapOrigin;// color map origin // 2
+            public byte[] cMapLength;// color map length // 2
+            public byte cMapBits;     // color map entry size
+            public short x0;			// x-origin of image
+            public short y0;			// y-origin of image
+            public short width;		// width of image
+            public short height;		// height of image
+            public byte pixelSize;    // image pixel size
+            public byte descriptor;   // image descriptor byte
         };
+
         private byte[] SeralizeCTargaHeadAsArray(CTargaHead h)
         {
             return BitConverter.GetBytes(h.idLength).Concat(
@@ -686,11 +692,11 @@ void WriteFile(CImage img, string filename)
                     int yr = reverseRows ? sh.height - 1 - y : y;
                     var ptr = img.GetPixelAddress(0, yr, 0);
                     int n = sh.width * sh.nBands; // THIS IS HOW MANY PIXELS WE NEED TO WRITE OUT a whole rows worth!
-                  //works really great in c++ but not so great in our modified c# version!!
+                    //works really great in c++ but not so great in our modified c# version!!
                     //and with this crap about reversing rows. was that a quirk of the C++ Code?
                     throw new NotImplementedException("Have to figure out how to write the bytes that represent the pixels here!");
                     //if (fwrite(ptr, sizeof(uchar), n, stream) != n)
-                      //  throw new Exception(string.Format("WriteFileTGA({0}): file is too short", filename));
+                    //  throw new Exception(string.Format("WriteFileTGA({0}): file is too short", filename));
                 }
 
                 //if (fclose(stream))
