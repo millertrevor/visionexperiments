@@ -99,9 +99,22 @@ namespace PixelMap
 
         public string SaveBitmapAsJpeg(System.IO.FileInfo incomingInfo)
         {
+            string saveString = "";
             var newString = incomingInfo.Name.Remove(incomingInfo.Name.Length - incomingInfo.Extension.Length);
-            var saveString = incomingInfo.Directory.FullName +Path.DirectorySeparatorChar+ newString + ".jpg";
-            BitMap.Save(saveString, ImageFormat.Jpeg);
+            if (this.header.MagicNumber == "P5")
+            {
+                saveString = incomingInfo.Directory.FullName + Path.DirectorySeparatorChar + newString + "TEST.bmp";
+                GreyMap.Save(saveString, ImageFormat.Bmp);
+            }
+            else
+            {
+
+                saveString = incomingInfo.Directory.FullName + Path.DirectorySeparatorChar + newString + ".jpg";
+
+                BitMap.Save(saveString, ImageFormat.Jpeg);
+            }
+            //   BitMap.Save(saveStringBMP, ImageFormat.Tiff);
+           
             return saveString;
         }
 

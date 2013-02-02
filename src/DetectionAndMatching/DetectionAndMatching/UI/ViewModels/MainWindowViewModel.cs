@@ -153,7 +153,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 // Open document 
                 string filename = dlg.FileName;
                 System.IO.FileInfo fi = new System.IO.FileInfo(filename);
-                if (fi.Extension == ".ppm")
+                if (fi.Extension == ".ppm" || fi.Extension==".pgm")
                 {
                     filename = ConvertToJpeg(fi);
                 }
