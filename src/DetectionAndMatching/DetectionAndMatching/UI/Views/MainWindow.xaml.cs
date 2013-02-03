@@ -17,9 +17,6 @@ using DetectionAndMatching.UI.ViewModels;
 
 namespace DetectionAndMatching.UI.Views
 {
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
     public partial class MainWindow : Window
     {
         AdornerLayer myAdornerLayer;
@@ -180,8 +177,6 @@ namespace DetectionAndMatching.UI.Views
                 this.RRMouseUp(sender, e);
             }
         }
-
-       
     }
 
    

@@ -11,8 +11,6 @@ namespace ImageReader
 {
     public class ImageReader
     {
-        //http://en.wikipedia.org/wiki/HSL_and_HSV
-
         int pixels = 0;
         int pixelsWithoutBlack = 0;
 
@@ -31,6 +29,8 @@ namespace ImageReader
         public int[] l = new int[256];
         int[] swb = new int[256];
         int[] lwb = new int[256];
+
+        int[] cdf = new int[256];
 
 
 
@@ -57,20 +57,11 @@ namespace ImageReader
                     Pixels.Add(pixel.R);
                     Pixels.Add(pixel.G);
                     Pixels.Add(pixel.B);
-                    var tryOne =  0.299*pixel.R + 0.587*pixel.G + 0.114*pixel.B;
-                   // //Y = 0.2126 R + 0.7152 G + 0.0722 B
-                    var tryTwo = (0.257 * pixel.R) + (0.504 * pixel.G) + (0.098 * pixel.B) + 16;
-                    var lum = (0.299 * pixel.R) + (0.587 * pixel.G) + (0.114 * pixel.B);
-                    var lumConverted = Convert.ToInt32(lum);
-                    if (lum != lumConverted)
-                    {
-                        int breakage = -1;
-                    }
-
+                    
                     rgb.Red = pixel.R;
                     rgb.Green = pixel.G;
                     rgb.Blue = pixel.B;
-
+                    
                     // convert to HSL color space
                     HSL.FromRGB(rgb, hsl);
 
@@ -84,16 +75,7 @@ namespace ImageReader
                         lwb[(int)(hsl.Luminance * 255)]++;
                         pixelsWithoutBlack++;
                     }
-                    int stop = -1;
-                    // create histograms
-                    //saturation = new ContinuousHistogram(s, new DoubleRange(0, 1));
-                    //luminance = new ContinuousHistogram(l, new DoubleRange(0, 1));
-
-                    //saturationWithoutBlack = new ContinuousHistogram(swb, new DoubleRange(0, 1));
-                    //luminanceWithoutBlack = new ContinuousHistogram(lwb, new DoubleRange(0, 1));
-
-                   
-
+                    
                     byte rValue, gValue, bValue;
 
                     // get pixel values
@@ -113,11 +95,8 @@ namespace ImageReader
                         bwb[bValue]++;
                         pixelsWithoutBlackRGB++;
                     }
-
-                    // myLum.Add(lum);
                 }
             }
-            int stopper = -1;
         }
         public List<byte> Pixels
         {
@@ -166,109 +145,18 @@ namespace ImageReader
 
             return smoothedValues;
         }
-        //private void OnButtonClick(object sender, RoutedEventArgs e)
-        //{
-        //    this.Cursor = Cursors.Wait;
-        //    try
-        //    {
-        //        if (String.IsNullOrWhiteSpace(this.ImageURL))
-        //        {
-        //            MessageBox.Show("Image URL is mandatory.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        //            return;
-        //        }
-
-        //        String localFilePath = null;
-        //        try
-        //        {
-        //            localFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
-        //            using (WebClient client = new WebClient())
-        //            {
-        //                client.DownloadFile(this.ImageURL, localFilePath);
-        //            }
-        //            this.LocalImagePath = localFilePath;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            MessageBox.Show("Invalid image URL. Image could not be retrieved", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        //            return;
-        //        }
-        //        //green represents 59% of the perceived luminosity, while the red and blue channels account for just 30% and 11%,
-        //        // 0.3 R + 0.59 G + 0.11 B
-        //        List<int> myLum = new List<int>();
-        //        using (System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(localFilePath))
-        //        {
-        //            for (int h = 0; h < bmp.Height; h++)
-        //            {
-        //                for (int j = 0; j < bmp.Width; j++)
-        //                {
-        //                    var pixel = bmp.GetPixel(j, h);
-        //                    //0.299 red + 0.587 green + 0.114 blue.
-        //                    //Y = 0.2126 R + 0.7152 G + 0.0722 B
-        //                    var lum = (0.299 * pixel.R) + (0.587 * pixel.G) + (0.114 * pixel.B);
-        //                    var lumConverted = Convert.ToInt32(lum);
-        //                    if (lum != lumConverted)
-        //                    {
-        //                        int breakage = -1;
-        //                    }
-        //                    // myLum.Add(lum);
-        //                }
-        //            }
-        //            // Luminance
-        //            ImageStatisticsHSL hslStatistics = new ImageStatisticsHSL(bmp);
-        //            this.LuminanceHistogramPoints = ConvertToPointCollection(hslStatistics.Luminance.Values);
-        //            // RGB
-        //            ImageStatistics rgbStatistics = new ImageStatistics(bmp);
-        //            this.RedColorHistogramPoints = ConvertToPointCollection(rgbStatistics.Red.Values);
-        //            this.GreenColorHistogramPoints = ConvertToPointCollection(rgbStatistics.Green.Values);
-        //            this.BlueColorHistogramPoints = ConvertToPointCollection(rgbStatistics.Blue.Values);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Error generating histogram: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        //    }
-        //    finally
-        //    {
-        //        this.Cursor = Cursors.Arrow;
-        //    }
-        //}
-
-
-        //public void SampleCode()
-        //{
-        //     // Create a new bitmap.
-        //    Bitmap bmp = new Bitmap(@"C:\Users\Trevor\Documents\GitHub\visionexperiments\src\DetectionAndMatching\DetectionAndMatching\bin\Debug\test.jpg");
-
-        //    // Lock the bitmap's bits.  
-        //    Rectangle rect = new Rectangle(0, 0, bmp.Width, bmp.Height);
-        //    System.Drawing.Imaging.BitmapData bmpData =
-        //        bmp.LockBits(rect, System.Drawing.Imaging.ImageLockMode.ReadWrite,
-        //        bmp.PixelFormat);
-
-        //    // Get the address of the first line.
-        //    IntPtr ptr = bmpData.Scan0;
-
-        //    // Declare an array to hold the bytes of the bitmap. 
-        //    int bytes  = Math.Abs(bmpData.Stride) * bmp.Height;
-        //    byte[] rgbValues = new byte[bytes];
-
-        //    // Copy the RGB values into the array.
-        //    System.Runtime.InteropServices.Marshal.Copy(ptr, rgbValues, 0, bytes);
-
-        //    // Set every third value to 255. A 24bpp bitmap will look red.   
-        //    for (int counter = 2; counter < rgbValues.Length; counter += 3)
-        //        rgbValues[counter] = 255;
-
-        //    // Copy the RGB values back to the bitmap
-        //    System.Runtime.InteropServices.Marshal.Copy(rgbValues, 0, ptr, bytes);
-
-        //    // Unlock the bits.
-        //    bmp.UnlockBits(bmpData);
-
-        //    // Draw the modified image.
-        //    //e.Graphics.DrawImage(bmp, 0, 150);
-        //    bmp.Save("DistoredImage.bmp", ImageFormat.Bmp);
-        //}
-
+        public void SaveAsBitmap(string name)
+        {
+            int pixelTracker = 0;
+            var bm = new Bitmap(Width, Height);
+            for (int j = 0; j < bm.Height; j++)
+            {
+                for (int i = 0; i < bm.Width; i++)
+                {
+                    bm.SetPixel(i,j,Color.FromArgb(Pixels[pixelTracker++],Pixels[pixelTracker++],Pixels[pixelTracker++]));
+                }
+            }
+            bm.Save(name);
+        }
     }
 }

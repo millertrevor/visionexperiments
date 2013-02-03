@@ -44,27 +44,23 @@
                 <RowDefinition />
             </Grid.RowDefinitions>
             <GroupBox Grid.Column="0" Grid.Row="0" Header="Luminosity" BorderThickness="0">
-                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">
-                    <!--Points="{Binding LuminanceHistogramPoints}"-->
-                    <Polygon  Stretch="Fill" Fill="Black" Opacity="0.8" />
+                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">                 
+                    <Polygon Points="{Binding LuminanceHistogramPointsR}" Stretch="Fill" Fill="Black" Opacity="0.8" />
                 </Border>
             </GroupBox>
             <GroupBox Grid.Column="0" Grid.Row="1" Header="Red" BorderThickness="0">
-                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">
-                    <!--Points="{Binding RedColorHistogramPoints}"-->
-                    <Polygon  Stretch="Fill" Fill="Red" Opacity="0.8" />
+                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">                    
+                    <Polygon Points="{Binding RedColorHistogramPointsR}" Stretch="Fill" Fill="Red" Opacity="0.8" />
                 </Border>
             </GroupBox>
             <GroupBox Grid.Column="0" Grid.Row="2" Header="Green" BorderThickness="0">
-                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">
-                    <!--Points="{Binding GreenColorHistogramPoints}"-->
-                    <Polygon  Stretch="Fill" Fill="Green" Opacity="0.8" />
+                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">                  
+                    <Polygon Points="{Binding GreenColorHistogramPointsR}" Stretch="Fill" Fill="Green" Opacity="0.8" />
                 </Border>
             </GroupBox>
             <GroupBox Grid.Column="0" Grid.Row="3" Header="Blue" BorderThickness="0">
-                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">
-                    <!--Points="{Binding BlueColorHistogramPoints}"-->
-                    <Polygon  Stretch="Fill" Fill="Blue" Opacity="0.8" />
+                <Border BorderThickness="1" BorderBrush="Black" Background="White" Margin="4">                   
+                    <Polygon Points="{Binding BlueColorHistogramPointsR}" Stretch="Fill" Fill="Blue" Opacity="0.8" />
                 </Border>
             </GroupBox>
         </Grid>

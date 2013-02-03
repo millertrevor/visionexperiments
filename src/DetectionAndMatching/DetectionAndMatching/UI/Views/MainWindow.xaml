@@ -36,6 +36,7 @@
                     <MenuItem Header="_Perform Query"></MenuItem>
                     <Separator></Separator>
                     <MenuItem Header="Show _Histograms" Click="Histogram_OnClick"></MenuItem>
+                    <MenuItem Header="Equalize Histogram" Command="{Binding EqualizeHistogramCommand}"></MenuItem>
                 </MenuItem>
                 
                 <MenuItem Header="_Options">
@@ -51,7 +52,6 @@
             </Menu>
             
             <Viewbox x:Name="leftViewBox" DockPanel.Dock="Left">
-                <!--<Grid>-->
                 <ItemsControl x:Name="leftItemsControl" ItemsPanel="{DynamicResource ResourceKey=CanvasLeftTemplate}" MouseMove="itemsControl_MouseMove" MouseRightButtonDown="RRMouseDown" MouseRightButtonUp="RRMouseUp" MouseLeave="leftItemsControl_MouseLeave_1"  ItemsSource="{Binding QueryFeatures}" Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}" RenderTransformOrigin="0.5,0.5">
                     <ItemsControl.RenderTransform>
                         <TransformGroup>
@@ -61,17 +61,6 @@
                             <TranslateTransform/>
                         </TransformGroup>
                     </ItemsControl.RenderTransform>
-
-                    <!--<ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                            <Canvas x:Name="leftCanvas" PreviewMouseDown="Canvas_PreviewMouseLeftButtonDown" >
-                                    <Canvas.Background>
-                                        <ImageBrush Stretch="Uniform" ImageSource="{Binding LeftPictureLocation}"/>
-                                    </Canvas.Background>
-                                </Canvas>
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>-->
-
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="{x:Type models:Feature}">
                             <Grid IsHitTestVisible="True" Visibility="{Binding Visibility}" >
@@ -84,18 +73,6 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-                    <!-- This canvas is overlaid over the previous canvas and is used to 
-                place the rectangle that implements the drag selection box. -->
-                    <!--<Canvas Width="{Binding LeftImageWidth}" Height="{Binding LeftImageHeight}">
-                   
-                    <Rectangle
-                x:Name="selectionBox"
-                Visibility="Collapsed"
-                Stroke="Black"
-                StrokeThickness="1"
-                />
-                </Canvas>
-                </Grid>-->
             </Viewbox>
             <Viewbox DockPanel.Dock="Right">
                 <ItemsControl  ItemsSource="{Binding RightCollection}" Width="{Binding RightImageWidth}" Height="{Binding RightImageHeight}">

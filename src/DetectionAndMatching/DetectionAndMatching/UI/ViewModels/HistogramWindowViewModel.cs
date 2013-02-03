@@ -20,6 +20,12 @@ namespace DetectionAndMatching.UI.ViewModels
         private PointCollection redColorHistogramPoints = null;
         private PointCollection greenColorHistogramPoints = null;
         private PointCollection blueColorHistogramPoints = null;
+
+        private PointCollection luminanceHistogramPointsR = null;
+        private PointCollection redColorHistogramPointsR = null;
+        private PointCollection greenColorHistogramPointsR = null;
+        private PointCollection blueColorHistogramPointsR = null;
+
         public bool PerformHistogramSmoothing { get; set; }
 
         public PointCollection LuminanceHistogramPoints
@@ -98,7 +104,82 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
 
-        
+        public PointCollection LuminanceHistogramPointsR
+        {
+            get
+            {
+                return this.luminanceHistogramPointsR;
+            }
+            set
+            {
+                if (this.luminanceHistogramPointsR != value)
+                {
+                    this.luminanceHistogramPointsR = value;
+                    if (this.PropertyChanged != null)
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("LuminanceHistogramPointsR"));
+                    }
+                }
+            }
+        }
+
+        public PointCollection RedColorHistogramPointsR
+        {
+            get
+            {
+                return this.redColorHistogramPointsR;
+            }
+            set
+            {
+                if (this.redColorHistogramPointsR != value)
+                {
+                    this.redColorHistogramPointsR = value;
+                    if (this.PropertyChanged != null)
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("RedColorHistogramPointsR"));
+                    }
+                }
+            }
+        }
+
+        public PointCollection GreenColorHistogramPointsR
+        {
+            get
+            {
+                return this.greenColorHistogramPointsR;
+            }
+            set
+            {
+                if (this.greenColorHistogramPointsR != value)
+                {
+                    this.greenColorHistogramPointsR = value;
+                    if (this.PropertyChanged != null)
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("GreenColorHistogramPointsR"));
+                    }
+                }
+            }
+        }
+
+        public PointCollection BlueColorHistogramPointsR
+        {
+            get
+            {
+                return this.blueColorHistogramPointsR;
+            }
+            set
+            {
+                if (this.blueColorHistogramPointsR != value)
+                {
+                    this.blueColorHistogramPointsR = value;
+                    if (this.PropertyChanged != null)
+                    {
+                        PropertyChanged(this, new PropertyChangedEventArgs("BlueColorHistogramPointsR"));
+                    }
+                }
+            }
+        }
+
 
         public event PropertyChangedEventHandler PropertyChanged;
 

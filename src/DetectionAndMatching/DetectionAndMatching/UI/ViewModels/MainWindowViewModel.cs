@@ -137,9 +137,36 @@ namespace DetectionAndMatching.UI.ViewModels
             get { return _loadQueryImageEnabled; }
             set { _loadQueryImageEnabled = value; }
         }
+        public void LoadRightImage(string fullFileName)
+        {
+            // Open document 
+            string filename = fullFileName;
+            System.IO.FileInfo fi = new System.IO.FileInfo(filename);
+            if (fi.Extension == ".ppm" || fi.Extension == ".pgm")
+            {
+                filename = ConvertToJpeg(fi);
+            }
 
+            //_dirLocation = dlg.InitialDirectory;
+            // _doc.load_query_image(filename);
+            RightPictureLocation = filename;
+            load_result_image(RightPictureLocation);
+            //var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
+            var bi = new ImageReader.ImageReader(RightPictureLocation);
+            
+            HistogramWindowViewModel.LuminanceHistogramPointsR = ConvertToPointCollection(bi.l);
+            HistogramWindowViewModel.RedColorHistogramPointsR = ConvertToPointCollection(bi.r);
+            HistogramWindowViewModel.GreenColorHistogramPointsR = ConvertToPointCollection(bi.g);
+            HistogramWindowViewModel.BlueColorHistogramPointsR = ConvertToPointCollection(bi.b);
+            
+            RightImageHeight = bi.Height;
+            RightImageWidth = bi.Width;
+        }
         private void LoadQueryImageExecute()
         {
+            RightImageWidth = 0;
+            RightImageHeight = 0;
+            RightPictureLocation = "";
             var dlg = new Microsoft.Win32.OpenFileDialog();
             // Set filter for file extension and default file extension 
             dlg.DefaultExt = ".jpg";
@@ -167,7 +194,7 @@ namespace DetectionAndMatching.UI.ViewModels
                // _doc.load_query_image(filename);
                 LeftPictureLocation = filename;
                 load_query_image(LeftPictureLocation);
-                //var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
+                
                 var bi = new ImageReader.ImageReader(LeftPictureLocation);
                 var hwvm = new HistogramWindowViewModel
                                {
@@ -325,27 +352,63 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
 
-        //private ICommand _histogramCommand;
-        //public ICommand ShowHistogramCommand
-        //{
-        //    get
-        //    {
-        //        return _histogramCommand ??
-        //               (_histogramCommand =
-        //                new RelayCommand(param => ShowHistogramCommandExecute(), param => ShowHistogramCommandEnabled));
-        //    }
-        //}
+        private ICommand _histogramCommand;
+        public ICommand EqualizeHistogramCommand
+        {
+            get
+            {
+                return _histogramCommand ??
+                       (_histogramCommand =
+                        new RelayCommand(param => EqualizeHistogramCommandExecute(), param => EqualizeHistogramCommandEnabled));
+            }
+        }
 
-        //private bool _showHistogramCommandEnabled = true;
-        //public bool ShowHistogramCommandEnabled
-        //{
-        //    get { return _showHistogramCommandEnabled; }
-        //    set { _showHistogramCommandEnabled = value; }
-        //}
-        //private void ShowHistogramCommandExecute()
-        //{
-         
-        //}
+        private bool _equalizeHistogramCommandEnabled = true;
+        public bool EqualizeHistogramCommandEnabled
+        {
+            get { return _equalizeHistogramCommandEnabled; }
+            set { _equalizeHistogramCommandEnabled = value; }
+        }
+        private void EqualizeHistogramCommandExecute()
+        {
+            var bi = new ImageReader.ImageReader(LeftPictureLocation);
+
+            var L = 256 - 1;
+            var MN = bi.Width * bi.Height;
+
+            List<int> cdf = new List<int>();
+            cdf.Add(bi.l[0]);
+            int min = int.MaxValue;
+            int max = int.MinValue;
+            for (int i = 1; i < bi.l.Length; i++)
+            {
+                var tempValue = bi.l[i] + cdf[i - 1];
+                if (tempValue > 0 && tempValue < min)
+                {
+                    min = tempValue;
+                }
+                if (tempValue > max)
+                {
+                    max = tempValue;
+                }
+                cdf.Add(tempValue);
+            }
+
+            List<byte> newImage = new List<byte>();
+            foreach (var item in bi.Pixels)
+            {
+                double eq = (((double)(cdf[item] - min) / (double)(MN - min)) * (double)L);
+                newImage.Add((byte)Math.Round(eq, MidpointRounding.ToEven));
+            }
+            var newImageFile = new ImageReader.ImageReader();
+            newImageFile.Width = bi.Width;
+            newImageFile.Height = bi.Height;
+            newImageFile.Pixels = newImage;
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Equalized" + fi.Name;
+            newImageFile.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
 
         private ICommand _exitCommand;
         public ICommand ExitCommand
@@ -372,6 +435,10 @@ namespace DetectionAndMatching.UI.ViewModels
         public void load_query_image(string queryImageName)
         {
             _queryImage = queryImageName;
+        }
+        public void load_result_image(string resultImageName)
+        {
+            _resultImage = resultImageName;
         }
         public void load_query_features(string fileName, bool sift)
         {
