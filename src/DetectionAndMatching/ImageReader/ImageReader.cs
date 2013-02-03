@@ -11,6 +11,8 @@ namespace ImageReader
 {
     public class ImageReader
     {
+        //http://en.wikipedia.org/wiki/HSL_and_HSV
+
         public ImageReader(string imageFile)
         {
             Bitmap img = new Bitmap(imageFile);
@@ -65,7 +67,7 @@ namespace ImageReader
         public ImageReader()
         {
         }
-
+        
         //public void SampleCode()
         //{
         //     // Create a new bitmap.
