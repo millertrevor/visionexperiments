@@ -36,46 +36,46 @@ namespace DetectionAndMatching
         }
 
 
-        private void TestAddition()
-        {
-            var imageOne = new ImageReader.ImageReader("son1.gif");
-            var imageTwo = new ImageReader.ImageReader("son2.gif");
-            List<byte> resultPixels = new List<byte>();
-            for (int i = 0; i < imageOne.Pixels.Count; i++)
-            {
-                resultPixels.Add((byte)
-                    (
-                   // Convert.ToByte(
-                      (byte)imageOne.Pixels[i]+100
-                    -
-                    (byte)imageTwo.Pixels[i]
-                  //  )
+        //private void TestAddition()
+        //{
+        //    var imageOne = new ImageReader.ImageReader("son1.gif");
+        //    var imageTwo = new ImageReader.ImageReader("son2.gif");
+        //    List<byte> resultPixels = new List<byte>();
+        //    for (int i = 0; i < imageOne.Pixels.Count; i++)
+        //    {
+        //        resultPixels.Add((byte)
+        //            (
+        //           // Convert.ToByte(
+        //              (byte)imageOne.Pixels[i]+100
+        //            -
+        //            (byte)imageTwo.Pixels[i]
+        //          //  )
                   
-                    )
-                    );
-            }
+        //            )
+        //            );
+        //    }
 
-            Bitmap img = new Bitmap(imageOne.Width, imageOne.Height);
-           // img.Width = imageOne.Width;
-           // img.Height = imageOne.Height;
-           // Count = 1;//Something more here!? //TODO: what is this really
-           // d = 3;
-          //  Pixels = new List<byte>();
-            int pixelCount=0;
-            for (int j = 0; j < img.Height; j++)
-            {
-                for (int i = 0; i < img.Width; i++)
-                {
-                  //  Color pixel = img.GetPixel(i, j);
-                   var color =  Color.FromArgb(resultPixels[pixelCount++], resultPixels[pixelCount++], resultPixels[pixelCount++]);
+        //    Bitmap img = new Bitmap(imageOne.Width, imageOne.Height);
+        //   // img.Width = imageOne.Width;
+        //   // img.Height = imageOne.Height;
+        //   // Count = 1;//Something more here!? //TODO: what is this really
+        //   // d = 3;
+        //  //  Pixels = new List<byte>();
+        //    int pixelCount=0;
+        //    for (int j = 0; j < img.Height; j++)
+        //    {
+        //        for (int i = 0; i < img.Width; i++)
+        //        {
+        //          //  Color pixel = img.GetPixel(i, j);
+        //           var color =  Color.FromArgb(resultPixels[pixelCount++], resultPixels[pixelCount++], resultPixels[pixelCount++]);
 
-                   img.SetPixel(i, j, color);
+        //           img.SetPixel(i, j, color);
                     
-                }
-            }
+        //        }
+        //    }
 
-            img.Save("TESTOUTPUTAddition.bmp");
-        }
+        //    img.Save("TESTOUTPUTAddition.bmp");
+        //}
 
         private void ProcessCommandLineParameters(string[] argv)
         {

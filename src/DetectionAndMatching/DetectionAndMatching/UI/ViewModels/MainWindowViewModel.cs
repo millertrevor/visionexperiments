@@ -43,7 +43,13 @@ namespace DetectionAndMatching.UI.ViewModels
                 QueryFeatures.select_box(xMin, xMax, yMin, yMax);
             }
         }
-        
+
+        private HistogramWindowViewModel _histogramWindowViewModel;
+        public HistogramWindowViewModel HistogramWindowViewModel
+        {
+            get { return _histogramWindowViewModel; }
+            set { _histogramWindowViewModel = value;NotifyPropertyChanged("HistogramWindowViewModel"); }
+        }
         public FeatureSet QueryFeatures
         {
             get { return _queryFeatures; }
@@ -161,9 +167,20 @@ namespace DetectionAndMatching.UI.ViewModels
                // _doc.load_query_image(filename);
                 LeftPictureLocation = filename;
                 load_query_image(LeftPictureLocation);
-                var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
-                LeftImageHeight = bi.PixelHeight;
-                LeftImageWidth = bi.PixelWidth;                
+                //var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
+                var bi = new ImageReader.ImageReader(LeftPictureLocation);
+                var hwvm = new HistogramWindowViewModel
+                               {
+                                   LuminanceHistogramPoints = ConvertToPointCollection(bi.l),
+                                   RedColorHistogramPoints = ConvertToPointCollection(bi.r),
+                                   GreenColorHistogramPoints = ConvertToPointCollection(bi.g),
+                                   BlueColorHistogramPoints = ConvertToPointCollection(bi.b)
+                               };
+
+                HistogramWindowViewModel = hwvm;
+
+                LeftImageHeight = bi.Height;
+                LeftImageWidth = bi.Width;                
             }
         }
         private string ConvertToJpeg(System.IO.FileInfo incomingInfo)
@@ -307,6 +324,29 @@ namespace DetectionAndMatching.UI.ViewModels
                 LoadDataBase();
             }
         }
+
+        //private ICommand _histogramCommand;
+        //public ICommand ShowHistogramCommand
+        //{
+        //    get
+        //    {
+        //        return _histogramCommand ??
+        //               (_histogramCommand =
+        //                new RelayCommand(param => ShowHistogramCommandExecute(), param => ShowHistogramCommandEnabled));
+        //    }
+        //}
+
+        //private bool _showHistogramCommandEnabled = true;
+        //public bool ShowHistogramCommandEnabled
+        //{
+        //    get { return _showHistogramCommandEnabled; }
+        //    set { _showHistogramCommandEnabled = value; }
+        //}
+        //private void ShowHistogramCommandExecute()
+        //{
+         
+        //}
+
         private ICommand _exitCommand;
         public ICommand ExitCommand
         {
@@ -553,94 +593,13 @@ namespace DetectionAndMatching.UI.ViewModels
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-        private PointCollection luminanceHistogramPoints = null;
-        private PointCollection redColorHistogramPoints = null;
-        private PointCollection greenColorHistogramPoints = null;
-        private PointCollection blueColorHistogramPoints = null;
-        public bool PerformHistogramSmoothing { get; set; }
-
-        public PointCollection LuminanceHistogramPoints
-        {
-            get
-            {
-                return this.luminanceHistogramPoints;
-            }
-            set
-            {
-                if (this.luminanceHistogramPoints != value)
-                {
-                    this.luminanceHistogramPoints = value;
-                    if (this.PropertyChanged != null)
-                    {
-                        PropertyChanged(this, new PropertyChangedEventArgs("LuminanceHistogramPoints"));
-                    }
-                }
-            }
-        }
-
-        public PointCollection RedColorHistogramPoints
-        {
-            get
-            {
-                return this.redColorHistogramPoints;
-            }
-            set
-            {
-                if (this.redColorHistogramPoints != value)
-                {
-                    this.redColorHistogramPoints = value;
-                    if (this.PropertyChanged != null)
-                    {
-                        PropertyChanged(this, new PropertyChangedEventArgs("RedColorHistogramPoints"));
-                    }
-                }
-            }
-        }
-
-        public PointCollection GreenColorHistogramPoints
-        {
-            get
-            {
-                return this.greenColorHistogramPoints;
-            }
-            set
-            {
-                if (this.greenColorHistogramPoints != value)
-                {
-                    this.greenColorHistogramPoints = value;
-                    if (this.PropertyChanged != null)
-                    {
-                        PropertyChanged(this, new PropertyChangedEventArgs("GreenColorHistogramPoints"));
-                    }
-                }
-            }
-        }
-
-        public PointCollection BlueColorHistogramPoints
-        {
-            get
-            {
-                return this.blueColorHistogramPoints;
-            }
-            set
-            {
-                if (this.blueColorHistogramPoints != value)
-                {
-                    this.blueColorHistogramPoints = value;
-                    if (this.PropertyChanged != null)
-                    {
-                        PropertyChanged(this, new PropertyChangedEventArgs("BlueColorHistogramPoints"));
-                    }
-                }
-            }
-        }
-
+        
         private PointCollection ConvertToPointCollection(int[] values)
         {
-            if (this.PerformHistogramSmoothing)
-            {
-                values = SmoothHistogram(values);
-            }
+            //if (this.PerformHistogramSmoothing)
+            //{
+            //    values = SmoothHistogram(values);
+            //}
 
             int max = values.Max();
 
@@ -658,92 +617,7 @@ namespace DetectionAndMatching.UI.ViewModels
             return points;
         }
 
-        private int[] SmoothHistogram(int[] originalValues)
-        {
-            int[] smoothedValues = new int[originalValues.Length];
-
-            double[] mask = new double[] { 0.25, 0.5, 0.25 };
-
-            for (int bin = 1; bin < originalValues.Length - 1; bin++)
-            {
-                double smoothedValue = 0;
-                for (int i = 0; i < mask.Length; i++)
-                {
-                    smoothedValue += originalValues[bin - 1 + i] * mask[i];
-                }
-                smoothedValues[bin] = (int)smoothedValue;
-            }
-
-            return smoothedValues;
-        }
-        //private void OnButtonClick(object sender, RoutedEventArgs e)
-        //{
-        //    this.Cursor = Cursors.Wait;
-        //    try
-        //    {
-        //        if (String.IsNullOrWhiteSpace(this.ImageURL))
-        //        {
-        //            MessageBox.Show("Image URL is mandatory.", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        //            return;
-        //        }
-
-        //        String localFilePath = null;
-        //        try
-        //        {
-        //            localFilePath = Path.Combine(Path.GetTempPath(), Path.GetTempFileName());
-        //            using (WebClient client = new WebClient())
-        //            {
-        //                client.DownloadFile(this.ImageURL, localFilePath);
-        //            }
-        //            this.LocalImagePath = localFilePath;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            MessageBox.Show("Invalid image URL. Image could not be retrieved", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        //            return;
-        //        }
-        //        //green represents 59% of the perceived luminosity, while the red and blue channels account for just 30% and 11%,
-        //        // 0.3 R + 0.59 G + 0.11 B
-        //        List<int> myLum = new List<int>();
-        //        using (System.Drawing.Bitmap bmp = new System.Drawing.Bitmap(localFilePath))
-        //        {
-        //            for (int h = 0; h < bmp.Height; h++)
-        //            {
-        //                for (int j = 0; j < bmp.Width; j++)
-        //                {
-        //                    var pixel = bmp.GetPixel(j, h);
-        //                    //0.299 red + 0.587 green + 0.114 blue.
-        //                    //Y = 0.2126 R + 0.7152 G + 0.0722 B
-        //                    var lum = (0.299 * pixel.R) + (0.587 * pixel.G) + (0.114 * pixel.B);
-        //                    var lumConverted = Convert.ToInt32(lum);
-        //                    if (lum != lumConverted)
-        //                    {
-        //                        int breakage = -1;
-        //                    }
-        //                    // myLum.Add(lum);
-        //                }
-        //            }
-        //            // Luminance
-        //            ImageStatisticsHSL hslStatistics = new ImageStatisticsHSL(bmp);
-        //            this.LuminanceHistogramPoints = ConvertToPointCollection(hslStatistics.Luminance.Values);
-        //            // RGB
-        //            ImageStatistics rgbStatistics = new ImageStatistics(bmp);
-        //            this.RedColorHistogramPoints = ConvertToPointCollection(rgbStatistics.Red.Values);
-        //            this.GreenColorHistogramPoints = ConvertToPointCollection(rgbStatistics.Green.Values);
-        //            this.BlueColorHistogramPoints = ConvertToPointCollection(rgbStatistics.Blue.Values);
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("Error generating histogram: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-        //    }
-        //    finally
-        //    {
-        //        this.Cursor = Cursors.Arrow;
-        //    }
-        //}
-
-
+       
 
     }
    

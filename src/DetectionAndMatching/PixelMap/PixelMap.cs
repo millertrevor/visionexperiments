@@ -4,20 +4,11 @@
 //but since this is an academic exercise....
 
 using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
-
-//using Microsoft.Xna.Framework;
-//using Microsoft.Xna.Framework.Graphics;
-
-//using XnaColor = Microsoft.Xna.Framework.Graphics.Color;
-//using XnaRectangle = Microsoft.Xna.Framework.Rectangle;
 using SysColor = System.Drawing.Color;
-using SysRectangle = System.Drawing.Rectangle;
 
 namespace PixelMap
 {

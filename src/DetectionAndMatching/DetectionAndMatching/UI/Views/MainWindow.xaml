@@ -34,6 +34,8 @@
                     <MenuItem Header="_Select All Features" Command="{Binding SelectAllFeatures}" CommandParameter="Select"></MenuItem>
                     <MenuItem Header="_Deselect All Features" Command="{Binding SelectAllFeatures}" CommandParameter="Deselect"></MenuItem>
                     <MenuItem Header="_Perform Query"></MenuItem>
+                    <Separator></Separator>
+                    <MenuItem Header="Show _Histograms" Click="Histogram_OnClick"></MenuItem>
                 </MenuItem>
                 
                 <MenuItem Header="_Options">

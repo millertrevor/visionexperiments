@@ -48,6 +48,14 @@ namespace DetectionAndMatching.UI.Views
                 myAdornerLayer.IsHitTestVisible = false;
             }
         }
+
+        private void Histogram_OnClick(object sender, RoutedEventArgs e)
+        {
+            var hw = new HistogramWindow();
+            hw.DataContext = (DataContext as MainWindowViewModel).HistogramWindowViewModel;
+            hw.Show();
+        }
+
         private void itemsControl_MouseMove(object sender, MouseEventArgs e)
         {
             if (mouseDown)
@@ -172,7 +180,8 @@ namespace DetectionAndMatching.UI.Views
                 this.RRMouseUp(sender, e);
             }
         }
- 
+
+       
     }
 
    
