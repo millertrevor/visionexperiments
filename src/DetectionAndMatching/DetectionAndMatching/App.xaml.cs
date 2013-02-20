@@ -59,7 +59,7 @@ namespace DetectionAndMatching
         //   // img.Width = imageOne.Width;
         //   // img.Height = imageOne.Height;
         //   // Count = 1;//Something more here!? //TODO: what is this really
-        //   // d = 3;
+        //   // depth = 3;
         //  //  Pixels = new List<byte>();
         //    int pixelCount=0;
         //    for (int j = 0; j < img.Height; j++)
@@ -190,7 +190,7 @@ namespace DetectionAndMatching
 
             int w = image.Width;
             int h = image.Height;
-            int d = image.d;
+            int d = image.depth;
 
             // Get the image data.
             var data = image.Pixels;

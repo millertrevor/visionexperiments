@@ -37,6 +37,8 @@
                     <Separator></Separator>
                     <MenuItem Header="Show _Histograms" Click="Histogram_OnClick"></MenuItem>
                     <MenuItem Header="Equalize Histogram" Command="{Binding EqualizeHistogramCommand}"></MenuItem>
+                    <MenuItem Header="Local Mean" Command="{Binding LocalMeanCommand}"></MenuItem>
+                    <MenuItem Header="Local Median" Command="{Binding LocalMedianCommand}"></MenuItem>
                 </MenuItem>
                 
                 <MenuItem Header="_Options">

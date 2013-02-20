@@ -25,8 +25,8 @@ namespace ImageReader
         int[] gwb = new int[256];
         int[] bwb = new int[256];
 
-        int[] s = new int[256];
-        public int[] l = new int[256];
+        int[] saturation = new int[256];
+        public int[] luminance = new int[256];
         int[] swb = new int[256];
         int[] lwb = new int[256];
 
@@ -40,7 +40,7 @@ namespace ImageReader
             Width = img.Width;
             Height = img.Height;
             Count = 1;//Something more here!? //TODO: what is this really
-            d = 3;
+            this.depth = 3;
             Pixels = new List<byte>();
 
          
@@ -65,8 +65,8 @@ namespace ImageReader
                     // convert to HSL color space
                     HSL.FromRGB(rgb, hsl);
 
-                    s[(int)(hsl.Saturation * 255)]++;
-                    l[(int)(hsl.Luminance * 255)]++;
+                    this.saturation[(int)(hsl.Saturation * 255)]++;
+                    this.luminance[(int)(hsl.Luminance * 255)]++;
                     pixels++;
 
                     if (hsl.Luminance != 0.0)
@@ -119,7 +119,7 @@ namespace ImageReader
             get;
             set;
         }
-        public int d
+        public int depth
         {
             get;
             set;
@@ -145,6 +145,33 @@ namespace ImageReader
 
             return smoothedValues;
         }
+
+        public byte GetPixel(int x, int y, int band)
+        {
+            // bandsize is one
+            int bandSize = 1;
+            // mpix size = m_bandSize * s.nBands
+            int pixSize = bandSize * this.depth;
+            // bands is 3 for RGB
+            // row size is bands * width
+            int rowSize = this.depth * this.Width;
+
+            int elementToGet = y * rowSize + x * pixSize + band * bandSize;
+            return Pixels[elementToGet];
+        }
+        public void SetPixel(int x, int y, int band, byte value)
+        {
+            // bandsize is one
+            int bandSize = 1;
+            // mpix size = m_bandSize * s.nBands
+            int pixSize = bandSize * this.depth;
+            // bands is 3 for RGB
+            // row size is bands * width
+            int rowSize = this.depth * this.Width;
+            int elementToSet = y * rowSize + x * pixSize + band * bandSize;
+            Pixels[elementToSet] = value;
+        }
+
         public void SaveAsBitmap(string name)
         {
             int pixelTracker = 0;

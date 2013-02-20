@@ -154,7 +154,7 @@ namespace DetectionAndMatching.UI.ViewModels
             //var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
             var bi = new ImageReader.ImageReader(RightPictureLocation);
             
-            HistogramWindowViewModel.LuminanceHistogramPointsR = ConvertToPointCollection(bi.l);
+            HistogramWindowViewModel.LuminanceHistogramPointsR = ConvertToPointCollection(bi.luminance);
             HistogramWindowViewModel.RedColorHistogramPointsR = ConvertToPointCollection(bi.r);
             HistogramWindowViewModel.GreenColorHistogramPointsR = ConvertToPointCollection(bi.g);
             HistogramWindowViewModel.BlueColorHistogramPointsR = ConvertToPointCollection(bi.b);
@@ -198,7 +198,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 var bi = new ImageReader.ImageReader(LeftPictureLocation);
                 var hwvm = new HistogramWindowViewModel
                                {
-                                   LuminanceHistogramPoints = ConvertToPointCollection(bi.l),
+                                   LuminanceHistogramPoints = ConvertToPointCollection(bi.luminance),
                                    RedColorHistogramPoints = ConvertToPointCollection(bi.r),
                                    GreenColorHistogramPoints = ConvertToPointCollection(bi.g),
                                    BlueColorHistogramPoints = ConvertToPointCollection(bi.b)
@@ -352,6 +352,242 @@ namespace DetectionAndMatching.UI.ViewModels
             }
         }
 
+        private ICommand _localMeanCommand;
+        public ICommand LocalMeanCommand
+        {
+            get
+            {
+                return _localMeanCommand
+                       ?? (_localMeanCommand =
+                           new RelayCommand(param => LocalMeanCommandExecute(), param => LocalMeanCommandEnabled));
+            }
+        }
+
+        private bool _localMeanCommandEnabled = true;
+        public bool LocalMeanCommandEnabled
+        {
+            get { return _localMeanCommandEnabled; }
+            set { _localMeanCommandEnabled = value; }
+        }
+
+        private void LocalMeanCommandExecute()
+        {
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            int stroke = image.Width * 3;
+            const int StartBorder = 0;
+            const int EndBorder = 1; //border of one for 3x3 mean block
+
+            var resultImage = new ImageReader.ImageReader();
+            resultImage.Count = image.Count;
+            resultImage.Height = image.Height;
+            resultImage.Width = image.Width;
+            resultImage.depth = image.depth;
+            resultImage.Pixels = new List<byte>(image.Pixels);
+
+
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                    if (h > StartBorder && h < image.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < image.Width - EndBorder)
+                        {
+                            //can average here
+                            var returnList = this.Average(w, h, 3, image);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+
+            //var newImageFile = new ImageReader.ImageReader();
+            //newImageFile.Width = image.Width;
+            //newImageFile.Height = image.Height;
+            //newImageFile.Pixels = image.Pixels;
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "LocalMean" + fi.Name;
+            resultImage.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
+
+        private List<byte> Average(int x, int y, int squareSize, ImageReader.ImageReader image)
+        {
+            var returnList = new List<byte>();
+
+            var oneR = image.GetPixel(x - 1, y - 1, 0);
+            var twoR = image.GetPixel(x, y - 1, 0);
+            var threeR = image.GetPixel(x + 1, y - 1, 0);
+            var fourR = image.GetPixel(x - 1, y, 0);
+            var fiveR = image.GetPixel(x, y, 0);
+            var sixR = image.GetPixel(x + 1, y, 0);
+            var sevenR = image.GetPixel(x - 1, y + 1, 0);
+            var eightR = image.GetPixel(x, y + 1, 0);
+            var nineR = image.GetPixel(x + 1, y + 1, 0);
+
+            var oneG = image.GetPixel(x - 1, y - 1, 1);
+            var twoG = image.GetPixel(x, y - 1, 1);
+            var threeG = image.GetPixel(x + 1, y - 1, 1);
+            var fourG = image.GetPixel(x - 1, y, 1);
+            var fiveG = image.GetPixel(x, y, 1);
+            var sixG = image.GetPixel(x + 1, y, 1);
+            var sevenG = image.GetPixel(x - 1, y + 1, 1);
+            var eightG = image.GetPixel(x, y + 1, 1);
+            var nineG = image.GetPixel(x + 1, y + 1, 1);
+
+            var oneB = image.GetPixel(x - 1, y - 1, 2);
+            var twoB = image.GetPixel(x, y - 1, 2);
+            var threeB = image.GetPixel(x + 1, y - 1, 2);
+            var fourB = image.GetPixel(x - 1, y, 2);
+            var fiveB = image.GetPixel(x, y, 2);
+            var sixB = image.GetPixel(x + 1, y, 2);
+            var sevenB = image.GetPixel(x - 1, y + 1, 2);
+            var eightB = image.GetPixel(x, y + 1, 2);
+            var nineB = image.GetPixel(x + 1, y + 1, 2);
+
+            var r = (oneR + twoR + threeR + fourR + fiveR + sixR + sevenR + eightR + nineR) / 9;
+            var g = (oneG + twoG + threeG + fourG + fiveG + sixG + sevenG + eightG + nineG) / 9;
+            var b = (oneB + twoB + threeB + fourB + fiveB + sixB + sevenB + eightB + nineB) / 9;
+            returnList.Add((byte)r);
+            returnList.Add((byte)g);
+            returnList.Add((byte)b);
+
+            return returnList;
+        }
+
+
+
+        private ICommand _localMedianCommand;
+        public ICommand LocalMedianCommand
+        {
+            get
+            {
+                return _localMedianCommand
+                       ?? (_localMedianCommand =
+                           new RelayCommand(param => LocalMedianCommandExecute(), param => LocalMedianCommandEnabled));
+            }
+        }
+
+        private bool _localMedianCommandEnabled = true;
+        public bool LocalMedianCommandEnabled
+        {
+            get { return _localMedianCommandEnabled; }
+            set { _localMedianCommandEnabled = value; }
+        }
+
+        private void LocalMedianCommandExecute()
+        {
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            int stroke = image.Width * 3;
+            const int StartBorder = 0;
+            const int EndBorder = 1; //border of one for 3x3 mean block
+            var resultImage = new ImageReader.ImageReader();
+            resultImage.Count = image.Count;
+            resultImage.Height = image.Height;
+            resultImage.Width = image.Width;
+            resultImage.depth = image.depth;
+            resultImage.Pixels = new List<byte>(image.Pixels);
+
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                    if (h > StartBorder && h < image.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < image.Width - EndBorder)
+                        {
+                            //can average here
+                            var returnList = this.FindMedians(w, h, 3, image);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+
+            //var newImageFile = new ImageReader.ImageReader();
+            //newImageFile.Width = image.Width;
+            //newImageFile.Height = image.Height;
+            //newImageFile.Pixels = image.Pixels;
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "LocalMedian" + fi.Name;
+            resultImage.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
+        private List<byte> FindMedians(int x, int y, int squareSize, ImageReader.ImageReader image)
+        {
+            var returnList = new List<byte>();
+
+            var oneR = image.GetPixel(x - 1, y - 1, 0);
+            var twoR = image.GetPixel(x, y - 1, 0);
+            var threeR = image.GetPixel(x + 1, y - 1, 0);
+            var fourR = image.GetPixel(x - 1, y, 0);
+            var fiveR = image.GetPixel(x, y, 0);
+            var sixR = image.GetPixel(x + 1, y, 0);
+            var sevenR = image.GetPixel(x - 1, y + 1, 0);
+            var eightR = image.GetPixel(x, y + 1, 0);
+            var nineR = image.GetPixel(x + 1, y + 1, 0);
+
+            var oneG = image.GetPixel(x - 1, y - 1, 1);
+            var twoG = image.GetPixel(x, y - 1, 1);
+            var threeG = image.GetPixel(x + 1, y - 1, 1);
+            var fourG = image.GetPixel(x - 1, y, 1);
+            var fiveG = image.GetPixel(x, y, 1);
+            var sixG = image.GetPixel(x + 1, y, 1);
+            var sevenG = image.GetPixel(x - 1, y + 1, 1);
+            var eightG = image.GetPixel(x, y + 1, 1);
+            var nineG = image.GetPixel(x + 1, y + 1, 1);
+
+            var oneB = image.GetPixel(x - 1, y - 1, 2);
+            var twoB = image.GetPixel(x, y - 1, 2);
+            var threeB = image.GetPixel(x + 1, y - 1, 2);
+            var fourB = image.GetPixel(x - 1, y, 2);
+            var fiveB = image.GetPixel(x, y, 2);
+            var sixB = image.GetPixel(x + 1, y, 2);
+            var sevenB = image.GetPixel(x - 1, y + 1, 2);
+            var eightB = image.GetPixel(x, y + 1, 2);
+            var nineB = image.GetPixel(x + 1, y + 1, 2);
+
+            var r = GetMedian(new List<byte> { oneR, twoR, threeR, fourR, fiveR, sixR, sevenR, eightR, nineR });
+            var g = GetMedian(new List<byte> { oneG, twoG, threeG, fourG, fiveG, sixG, sevenG, eightG, nineG });
+            var b = GetMedian(new List<byte> { oneB, twoB, threeB, fourB, fiveB, sixB, sevenB, eightB, nineB });
+            returnList.Add(r);
+            returnList.Add(g);
+            returnList.Add(b);
+
+            return returnList;
+        }
+
+
+       // public static decimal GetMedian(this IEnumerable<int> source) //could make it an extention method
+        public static byte GetMedian(IEnumerable<byte> source)
+        {
+            // Create a copy of the input, and sort the copy
+            byte[] temp = source.ToArray();
+            Array.Sort(temp);
+
+            int count = temp.Length;
+            if (count == 0)
+            {
+                throw new InvalidOperationException("Empty collection");
+            }
+            else if (count % 2 == 0)
+            {
+                // count is even, average two middle elements
+                int a = temp[count / 2 - 1];
+                int b = temp[count / 2];
+                return (byte)((a + b) / 2); // TODO: possible rounding issue here. but we are using an odd number so it isn't exposed.
+            }
+            else
+            {
+                // count is odd, return the middle element
+                return temp[count / 2];
+            }
+        }
+        
         private ICommand _histogramCommand;
         public ICommand EqualizeHistogramCommand
         {
@@ -371,38 +607,40 @@ namespace DetectionAndMatching.UI.ViewModels
         }
         private void EqualizeHistogramCommandExecute()
         {
-            var bi = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
 
             var L = 256 - 1;
-            var MN = bi.Width * bi.Height;
+            var MN = image.Width * image.Height;
 
             List<int> cdf = new List<int>();
-            cdf.Add(bi.l[0]);
+            cdf.Add(image.luminance[0]);
             int min = int.MaxValue;
             int max = int.MinValue;
-            for (int i = 1; i < bi.l.Length; i++)
+            for (int i = 1; i < image.luminance.Length; i++)
             {
-                var tempValue = bi.l[i] + cdf[i - 1];
+                var tempValue = image.luminance[i] + cdf[i - 1];
                 if (tempValue > 0 && tempValue < min)
                 {
                     min = tempValue;
                 }
+
                 if (tempValue > max)
                 {
                     max = tempValue;
                 }
+
                 cdf.Add(tempValue);
             }
 
             List<byte> newImage = new List<byte>();
-            foreach (var item in bi.Pixels)
+            foreach (var item in image.Pixels)
             {
                 double eq = (((double)(cdf[item] - min) / (double)(MN - min)) * (double)L);
                 newImage.Add((byte)Math.Round(eq, MidpointRounding.ToEven));
             }
             var newImageFile = new ImageReader.ImageReader();
-            newImageFile.Width = bi.Width;
-            newImageFile.Height = bi.Height;
+            newImageFile.Width = image.Width;
+            newImageFile.Height = image.Height;
             newImageFile.Pixels = newImage;
             var fi = new System.IO.FileInfo(LeftPictureLocation);
             var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Equalized" + fi.Name;
