@@ -13,6 +13,8 @@ using System.Drawing;
 
 namespace DetectionAndMatching
 {
+    using System.Globalization;
+
     /// <summary>
     /// Interaction logic for App.xaml
     /// </summary>
@@ -22,7 +24,7 @@ namespace DetectionAndMatching
         {
             //e.Args is the string[] of command line argruments
             //  var reader = new ImageReader.ImageReader("test.jpg");
-
+            
             //   reader.SampleCode();
             if (e.Args.Length > 0)
             {

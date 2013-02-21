@@ -14,6 +14,8 @@ using PixelMap;
 
 namespace DetectionAndMatching.UI.ViewModels
 {
+    using ImageLib;
+
     public class MainWindowViewModel : INotifyPropertyChanged
     {
         private string _dirLocation;
@@ -587,7 +589,177 @@ namespace DetectionAndMatching.UI.ViewModels
                 return temp[count / 2];
             }
         }
+
+
+        private ICommand _gaussianBlurCommand;
+        public ICommand GaussianBlurCommand
+        {
+            get
+            {
+                return _gaussianBlurCommand ??
+                       (_gaussianBlurCommand =
+                        new RelayCommand(param => GaussianBlurCommandExecute((string)param), param => GaussianBlurCommandEnabled));
+            }
+        }
+
+        private bool _gaussianBlurCommandEnabled = true;
+        public bool GaussianBlurCommandEnabled
+        {
+            get { return _gaussianBlurCommandEnabled; }
+            set { _gaussianBlurCommandEnabled = value; }
+        }
+
+        private void GaussianBlurCommandExecute(string sigmaStringValue)
+        {
+            double sigma = Convert.ToDouble(sigmaStringValue);
+            //double sigma = 4;
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            int stroke = image.Width * 3;
+            const int StartBorder = 5;
+            //need to skip 5 spaces to make the 11x11 i think
+            const int EndBorder = 5; //border of ? for 11x11 for block
+            var resultImage = new ImageReader.ImageReader();
+            resultImage.Count = image.Count;
+            resultImage.Height = image.Height;
+            resultImage.Width = image.Width;
+            resultImage.depth = image.depth;
+            resultImage.Pixels = new List<byte>(image.Pixels);
+
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                    if (h >= StartBorder && h < image.Height - EndBorder)
+                    {
+                        if (w >= StartBorder && w < image.Width - EndBorder)
+                        {
+                            var returnList = this.FindGaussian(w, h, 11, sigma, image);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+
+            //var newImageFile = new ImageReader.ImageReader();
+            //newImageFile.Width = image.Width;
+            //newImageFile.Height = image.Height;
+            //newImageFile.Pixels = image.Pixels;
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "GaussianBlur"+sigma.ToString() + fi.Name;
+            resultImage.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
         
+        private List<byte> FindGaussian(int x, int y, int size, double sigma, ImageReader.ImageReader image)
+        {
+            var locationP = (size - 1) / 2;
+            GaussianBlur gb = new GaussianBlur(sigma, size);
+            
+            List<byte> windowR = new List<byte>();
+            for (int j = -locationP; j < locationP + 1; j++)
+            {
+                for (int i = -locationP; i < locationP + 1; i++)
+                {
+                    windowR.Add(image.GetPixel(x + i, y + j, 0));
+                }
+            }
+
+            var byteWindowR = new byte[size, size];
+            int counter = 0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    byteWindowR[i, j] = windowR[counter];
+                    counter++;
+                }
+            }
+
+            List<byte> windowG = new List<byte>();
+            for (int j = -locationP; j < locationP + 1; j++)
+            {
+                for (int i = -locationP; i < locationP + 1; i++)
+                {
+                    windowG.Add(image.GetPixel(x + i, y + j, 1));
+                }
+            }
+
+            var byteWindowG = new byte[size, size];
+            counter = 0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    byteWindowG[i, j] = windowG[counter];
+                    counter++;
+                }
+            }
+
+            List<byte> windowB = new List<byte>();
+            for (int j = -locationP; j < locationP + 1; j++)
+            {
+                for (int i = -locationP; i < locationP + 1; i++)
+                {
+                    windowB.Add(image.GetPixel(x + i, y + j, 2));
+                }
+            }
+
+            var byteWindowB = new byte[size, size];
+            counter = 0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    byteWindowB[i, j] = windowB[counter];
+                    counter++;
+                }
+            }
+
+
+
+            var returnList = new List<byte>();
+
+            var runningR = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    runningR += byteWindowR[i, j] * gb.Kernel[i, j];
+                }
+            }
+
+            var runningG = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    runningG += byteWindowG[i, j] * gb.Kernel[i, j];
+                }
+            }
+
+            var runningB = 0.0;
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    runningB += byteWindowB[i, j] * gb.Kernel[i, j];
+                }
+            }
+
+            var origR = image.GetPixel(x, y, 0);
+            var origG = image.GetPixel(x, y, 1);
+            var origB = image.GetPixel(x, y, 2);
+            var r = (byte)Math.Round(runningR / gb.Divisor,MidpointRounding.AwayFromZero);
+            var g = (byte)Math.Round(runningG / gb.Divisor, MidpointRounding.AwayFromZero);
+            var b = (byte)Math.Round(runningB / gb.Divisor, MidpointRounding.AwayFromZero);
+            returnList.Add(r);
+            returnList.Add(g);
+            returnList.Add(b);
+
+            return returnList;
+        }
         private ICommand _histogramCommand;
         public ICommand EqualizeHistogramCommand
         {

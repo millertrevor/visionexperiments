@@ -42,8 +42,11 @@
     <Compile Include="CImage.cs" />
     <Compile Include="CImageAttributes.cs" />
     <Compile Include="CImageOf.cs" />
+    <Compile Include="Convolution.cs" />
     <Compile Include="CShape.cs" />
     <Compile Include="Enums\EBorderMode.cs" />
+    <Compile Include="Gaussian.cs" />
+    <Compile Include="GaussianBlur.cs" />
     <Compile Include="Image.cs" />
     <Compile Include="PixType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

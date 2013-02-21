@@ -39,6 +39,11 @@
                     <MenuItem Header="Equalize Histogram" Command="{Binding EqualizeHistogramCommand}"></MenuItem>
                     <MenuItem Header="Local Mean" Command="{Binding LocalMeanCommand}"></MenuItem>
                     <MenuItem Header="Local Median" Command="{Binding LocalMedianCommand}"></MenuItem>
+                    <MenuItem Header="Gaussian Blur" Command="{Binding GaussianBlurCommand}" CommandParameter="{Binding Text, ElementName=Sigmabox}"></MenuItem>
+                    <MenuItem><TextBox x:Name="Sigmabox">4</TextBox></MenuItem>
+                    <MenuItem>
+                        <TextBox>11</TextBox>
+                    </MenuItem>
                 </MenuItem>
                 
                 <MenuItem Header="_Options">
