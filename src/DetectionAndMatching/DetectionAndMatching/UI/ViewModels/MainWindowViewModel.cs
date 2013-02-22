@@ -633,7 +633,7 @@ namespace DetectionAndMatching.UI.ViewModels
                     {
                         if (w >= StartBorder && w < image.Width - EndBorder)
                         {
-                            var returnList = this.FindGaussian(w, h, 11, sigma, image);
+                            var returnList = this.FindGaussian(w, h, 5, 1.4, image);
                             resultImage.SetPixel(w, h, 0, returnList[0]);
                             resultImage.SetPixel(w, h, 1, returnList[1]);
                             resultImage.SetPixel(w, h, 2, returnList[2]);
@@ -656,7 +656,12 @@ namespace DetectionAndMatching.UI.ViewModels
         {
             var locationP = (size - 1) / 2;
             GaussianBlur gb = new GaussianBlur(sigma, size);
-            
+
+            var countercounter = 0.0;
+            foreach (var item in gb.Kernel)
+            {
+                countercounter += (double)item / (double)gb.Divisor;
+            }
             List<byte> windowR = new List<byte>();
             for (int j = -locationP; j < locationP + 1; j++)
             {
@@ -760,6 +765,176 @@ namespace DetectionAndMatching.UI.ViewModels
 
             return returnList;
         }
+
+        private ICommand _sobelCommand;
+        public ICommand SobelCommand
+        {
+            get
+            {
+                return _sobelCommand ??
+                       (_sobelCommand =
+                        new RelayCommand(param => SobelCommandExecute(), param => SobelCommandEnabled));
+            }
+        }
+
+        private bool _sobelCommandEnabled = true;
+        public bool SobelCommandEnabled
+        {
+            get { return _sobelCommandEnabled; }
+            set { _sobelCommandEnabled = value; }
+        }
+
+        private void SobelCommandExecute()
+        {
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            image.ConvertToGrey();
+            const int StartBorder = 0;
+            const int EndBorder = 1; //border of one for 3x3 mean block
+            var resultImage = new ImageReader.ImageReader();
+            resultImage.Count = image.Count;
+            resultImage.Height = image.Height;
+            resultImage.Width = image.Width;
+            resultImage.depth = image.depth;
+            resultImage.Pixels = new List<byte>(image.Pixels);
+            
+
+
+            //Gauss the image first
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                    if (h >= 2 && h < image.Height - 2)
+                    {
+                        if (w >= 2 && w < image.Width - 2)
+                        {
+                            var returnList = this.FindGaussian(w, h, 5, 1.4, image);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+
+            var GaussImage = new ImageReader.ImageReader();
+            GaussImage.Count = resultImage.Count;
+            GaussImage.Height = resultImage.Height;
+            GaussImage.Width = resultImage.Width;
+            GaussImage.depth = resultImage.depth;
+            GaussImage.Pixels = new List<byte>(resultImage.Pixels);
+
+            //then Sobel
+            for (var h = 0; h < GaussImage.Height; h++)
+            {
+                for (var w = 0; w < GaussImage.Width; w++)
+                {
+                    if (h > StartBorder && h < GaussImage.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < GaussImage.Width - EndBorder)
+                        {
+                            //can average here
+                            var returnList = this.SobelDetection(w, h, GaussImage);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+            
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Sobel" + fi.Name;
+            resultImage.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
+
+        private List<byte> SobelDetection(int x, int y, ImageReader.ImageReader image)
+        {
+            var returnList = new List<byte>();
+
+            var oneR = image.GetPixel(x - 1, y - 1, 0);
+            var twoR = image.GetPixel(x, y - 1, 0);
+            var threeR = image.GetPixel(x + 1, y - 1, 0);
+            var fourR = image.GetPixel(x - 1, y, 0);
+            var fiveR = image.GetPixel(x, y, 0);
+            var sixR = image.GetPixel(x + 1, y, 0);
+            var sevenR = image.GetPixel(x - 1, y + 1, 0);
+            var eightR = image.GetPixel(x, y + 1, 0);
+            var nineR = image.GetPixel(x + 1, y + 1, 0);
+
+            var oneG = image.GetPixel(x - 1, y - 1, 1);
+            var twoG = image.GetPixel(x, y - 1, 1);
+            var threeG = image.GetPixel(x + 1, y - 1, 1);
+            var fourG = image.GetPixel(x - 1, y, 1);
+            var fiveG = image.GetPixel(x, y, 1);
+            var sixG = image.GetPixel(x + 1, y, 1);
+            var sevenG = image.GetPixel(x - 1, y + 1, 1);
+            var eightG = image.GetPixel(x, y + 1, 1);
+            var nineG = image.GetPixel(x + 1, y + 1, 1);
+
+            var oneB = image.GetPixel(x - 1, y - 1, 2);
+            var twoB = image.GetPixel(x, y - 1, 2);
+            var threeB = image.GetPixel(x + 1, y - 1, 2);
+            var fourB = image.GetPixel(x - 1, y, 2);
+            var fiveB = image.GetPixel(x, y, 2);
+            var sixB = image.GetPixel(x + 1, y, 2);
+            var sevenB = image.GetPixel(x - 1, y + 1, 2);
+            var eightB = image.GetPixel(x, y + 1, 2);
+            var nineB = image.GetPixel(x + 1, y + 1, 2);
+
+            // GX
+            // -1 0 1
+            // -2 0 2
+            // -1 0 1
+
+            //GY
+            // 1 2 1
+            // 0 0 0
+            // -1 -2 -1
+            //abs(gx)+abs(gy)
+            //clamp to 255 or 0 just in case?
+            var GX = new List<int> { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+            var GY = new List<int> { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
+            var RArray = new List<byte> { oneR, twoR, threeR, fourR, fiveR, sixR, sevenR, eightR, nineR };
+            var GArray = new List<byte> { oneG, twoG, threeG, fourG, fiveG, sixG, sevenG, eightG, nineG };
+            var BArray = new List<byte> { oneB, twoB, threeB, fourB, fiveB, sixB, sevenB, eightB, nineB };
+
+            int GXR = 0;
+            int GXG = 0;
+            int GXB = 0;
+            int GYR = 0;
+            int GYG = 0;
+            int GYB = 0;
+
+            for (int i = 0; i < 9; i++)
+            {
+                GXR += GX[i] * RArray[i];
+                GXG += GX[i] * GArray[i];
+                GXB += GX[i] * BArray[i];
+
+                GYR += GY[i] * RArray[i];
+                GYG += GY[i] * GArray[i];
+                GYB += GY[i] * BArray[i];
+            }
+
+            var newR = Math.Abs(GXR) + Math.Abs(GYR);
+            var newG = Math.Abs(GXG) + Math.Abs(GYG);
+            var newB = Math.Abs(GXB) + Math.Abs(GYB);
+            if (newR > 255) newR = 255;
+            if (newG > 255) newG = 255;
+            if (newB > 255) newB = 255;
+            var r = newR;
+            var g = newG;
+            var b = newB;
+            returnList.Add((byte)r);
+            returnList.Add((byte)g);
+            returnList.Add((byte)b);
+
+            return returnList;
+
+        }
+
         private ICommand _histogramCommand;
         public ICommand EqualizeHistogramCommand
         {

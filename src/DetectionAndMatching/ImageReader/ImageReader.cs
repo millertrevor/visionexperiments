@@ -9,6 +9,8 @@ using System.Drawing.Imaging;
 
 namespace ImageReader
 {
+    using System.Diagnostics.CodeAnalysis;
+
     public class ImageReader
     {
         int pixels = 0;
@@ -170,6 +172,20 @@ namespace ImageReader
             int rowSize = this.depth * this.Width;
             int elementToSet = y * rowSize + x * pixSize + band * bandSize;
             Pixels[elementToSet] = value;
+        }
+        
+        public void ConvertToGrey()
+        {
+            for (var i = 0; i < this.Pixels.Count; i += 3)
+            {
+                var red = (int)this.Pixels[i];
+                var green = (int)this.Pixels[i + 1];
+                var blue = (int)this.Pixels[i + 2];
+                var grey = (byte)((red + green + blue) / 3);
+                this.Pixels[i] = grey;
+                this.Pixels[i + 1] = grey;
+                this.Pixels[i + 2] = grey;
+            }
         }
 
         public void SaveAsBitmap(string name)
