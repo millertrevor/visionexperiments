@@ -935,6 +935,169 @@ namespace DetectionAndMatching.UI.ViewModels
 
         }
 
+        public void KrischCommandExecute()
+ {
+   //Bitmap ret = new Bitmap(image.Width, image.Height);
+   //for (int i = 1; i < image.Width - 1; i++)
+   //{
+   //    for (int j = 1; j < image.Height - 1; j++)
+   //    {
+   //       Color cr = image.GetPixel(i + 1, j);
+   //       Color cl = image.GetPixel(i - 1, j);
+   //       Color cu = image.GetPixel(i, j - 1);
+   //       Color cd = image.GetPixel(i, j + 1);
+   //       Color cld = image.GetPixel(i - 1, j + 1);
+   //       Color clu = image.GetPixel(i - 1, j - 1);
+   //       Color crd = image.GetPixel(i + 1, j + 1);
+   //       Color cru = image.GetPixel(i + 1, j - 1);
+   //       int power = getMaxD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
+   //        if (power > 50)
+   //          ret.SetPixel(i, j, Color.Yellow);
+   //        else
+   //           ret.SetPixel(i, j, Color.Black);
+   //       }
+   //   }
+   //   return ret;
+
+     var image = new ImageReader.ImageReader(LeftPictureLocation);
+     image.ConvertToGrey();
+     const int StartBorder = 0;
+     const int EndBorder = 1; //border of one for 3x3 mean block
+     var resultImage = new ImageReader.ImageReader();
+     resultImage.Count = image.Count;
+     resultImage.Height = image.Height;
+     resultImage.Width = image.Width;
+     resultImage.depth = image.depth;
+     resultImage.Pixels = new List<byte>(image.Pixels);
+
+
+
+     //Gauss the image first
+     for (var h = 0; h < image.Height; h++)
+     {
+         for (var w = 0; w < image.Width; w++)
+         {
+             if (h >= 2 && h < image.Height - 2)
+             {
+                 if (w >= 2 && w < image.Width - 2)
+                 {
+                     var returnList = this.FindGaussian(w, h, 5, 1.4, image);
+                     resultImage.SetPixel(w, h, 0, returnList[0]);
+                     resultImage.SetPixel(w, h, 1, returnList[1]);
+                     resultImage.SetPixel(w, h, 2, returnList[2]);
+                 }
+             }
+         }
+     }
+
+     var GaussImage = new ImageReader.ImageReader();
+     GaussImage.Count = resultImage.Count;
+     GaussImage.Height = resultImage.Height;
+     GaussImage.Width = resultImage.Width;
+     GaussImage.depth = resultImage.depth;
+     GaussImage.Pixels = new List<byte>(resultImage.Pixels);
+
+     
+     for (var h = 0; h < GaussImage.Height; h++)
+     {
+         for (var w = 0; w < GaussImage.Width; w++)
+         {
+             if (h > StartBorder && h < GaussImage.Height - EndBorder)
+             {
+                 if (w > StartBorder && w < GaussImage.Width - EndBorder)
+                 {
+                     //can average here
+                     var returnList = this.Krisch(w, h, GaussImage);
+                     resultImage.SetPixel(w, h, 0, returnList[0]);
+                     resultImage.SetPixel(w, h, 1, returnList[1]);
+                     resultImage.SetPixel(w, h, 2, returnList[2]);
+                 }
+             }
+         }
+     }
+
+     var fi = new System.IO.FileInfo(LeftPictureLocation);
+     var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Krisch" + fi.Name;
+     resultImage.SaveAsBitmap(modifiedName);
+     LoadRightImage(modifiedName);
+}
+
+private ICommand _krischCommand;
+public ICommand KrischCommand
+{
+    get
+    {
+        return _krischCommand ??
+               (_krischCommand =
+                new RelayCommand(param => KrischCommandExecute(), param => KrischCommandEnabled));
+    }
+}
+
+private bool _krischCommandEnabled = true;
+public bool KrischCommandEnabled
+{
+    get { return _krischCommandEnabled; }
+    set { _krischCommandEnabled = value; }
+}
+
+private List<byte> Krisch(int x, int y, ImageReader.ImageReader image)
+{
+    var returnList = new List<byte>();
+    var cr = image.GetPixel(x + 1, y, 0);
+    var cl = image.GetPixel(x - 1, y, 0);
+    var cu = image.GetPixel(x, y - 1, 0);
+    var cd = image.GetPixel(x, y + 1, 0);
+    var cld = image.GetPixel(x - 1, y + 1, 0);
+    var clu = image.GetPixel(x - 1, y - 1, 0);
+    var crd = image.GetPixel(x + 1, y + 1, 0);
+    var cru = image.GetPixel(x + 1, y - 1, 0);
+    int power = getMaxD(cr, cl, cu, cd, cld, clu, cru, crd);
+    if (power > 50)
+    {
+        //ret.SetPixel(i, j, Color.Yellow);
+        returnList.Add(0);
+        returnList.Add(0);
+        returnList.Add(255);
+    }
+    else
+    {
+        //ret.SetPixel(i, j, Color.Black);
+        returnList.Add(255);
+        returnList.Add(255);
+        returnList.Add(255);
+    }
+    return returnList;
+}
+
+private int getD(int cr, int cl, int cu, int cd, int cld, int clu, int cru, int crd, int[,] matrix)
+{
+   return Math.Abs(  matrix[0, 0]*clu + matrix[0, 1]*cu + matrix[0, 2]*cru
+      + matrix[1, 0]*cl + matrix[1, 2]*cr
+         + matrix[2, 0]*cld + matrix[2, 1]*cd + matrix[2, 2]*crd);
+}
+private int getMaxD(int cr, int cl, int cu, int cd, int cld, int clu, int cru, int crd)
+{
+   int max = int.MinValue;
+   for (int i = 0; i < templates.Count; i++)
+   {
+      int newVal = getD(cr, cl, cu, cd, cld, clu, cru, crd, templates[i]);
+      if (newVal > max)
+         max = newVal;
+    }
+    return max;
+}
+private List<int[,]> templates = new List<int[,]> 
+{
+   new int[,] {{ -3, -3, 5 }, { -3, 0, 5 }, { -3, -3, 5 } },
+   new int[,] {{ -3, 5, 5 }, { -3, 0, 5 }, { -3, -3, -3 } },
+   new int[,] {{ 5, 5, 5 }, { -3, 0, -3 }, { -3, -3, -3 } },
+   new int[,] {{ 5, 5, -3 }, { 5, 0, -3 }, { -3, -3, -3 } },
+   new int[,] {{ 5, -3, -3 }, { 5, 0, -3 }, { 5, -3, -3 } },
+   new int[,] {{ -3, -3, -3 }, { 5, 0, -3 }, { 5, 5, -3 } },
+   new int[,] {{ -3, -3, -3 }, { -3, 0, -3 }, { 5, 5, 5 } },
+   new int[,] {{ -3, -3, -3 }, { -3, 0, 5 }, { -3, 5, 5 } }
+};
+
         private ICommand _histogramCommand;
         public ICommand EqualizeHistogramCommand
         {
