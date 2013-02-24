@@ -921,6 +921,10 @@ namespace DetectionAndMatching.UI.ViewModels
             var newR = Math.Abs(GXR) + Math.Abs(GYR);
             var newG = Math.Abs(GXG) + Math.Abs(GYG);
             var newB = Math.Abs(GXB) + Math.Abs(GYB);
+
+            //TODO: add this for Canny Detector
+            //var thetaR = Math.Atan(GYR / GXR);
+
             if (newR > 255) newR = 255;
             if (newG > 255) newG = 255;
             if (newB > 255) newB = 255;
@@ -1052,7 +1056,7 @@ private List<byte> Krisch(int x, int y, ImageReader.ImageReader image)
     var crd = image.GetPixel(x + 1, y + 1, 0);
     var cru = image.GetPixel(x + 1, y - 1, 0);
     int power = getMaxD(cr, cl, cu, cd, cld, clu, cru, crd);
-    if (power > 50)
+    if (power > 100)
     {
         //ret.SetPixel(i, j, Color.Yellow);
         returnList.Add(0);
