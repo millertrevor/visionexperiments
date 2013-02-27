@@ -796,8 +796,6 @@ namespace DetectionAndMatching.UI.ViewModels
             resultImage.Width = image.Width;
             resultImage.depth = image.depth;
             resultImage.Pixels = new List<byte>(image.Pixels);
-            
-
 
             //Gauss the image first
             for (var h = 0; h < image.Height; h++)
@@ -823,6 +821,97 @@ namespace DetectionAndMatching.UI.ViewModels
             GaussImage.Width = resultImage.Width;
             GaussImage.depth = resultImage.depth;
             GaussImage.Pixels = new List<byte>(resultImage.Pixels);
+            
+            //Sobel operator next
+            for (var h = 0; h < GaussImage.Height; h++)
+            {
+                for (var w = 0; w < GaussImage.Width; w++)
+                {
+                    if (h > StartBorder && h < GaussImage.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < GaussImage.Width - EndBorder)
+                        {
+                            var returnList = this.SobelDetection(w, h, GaussImage);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+            
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Sobel" + fi.Name;
+            resultImage.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
+
+
+        private ICommand _cannyCommand;
+        public ICommand CannyCommand
+        {
+            get
+            {
+                return _cannyCommand ??
+                       (_cannyCommand =
+                        new RelayCommand(param => CannyCommandExecute(), param => CannyCommandEnabled));
+            }
+        }
+
+        private bool _cannyCommandEnabled = true;
+        public bool CannyCommandEnabled
+        {
+            get { return _cannyCommandEnabled; }
+            set { _cannyCommandEnabled = value; }
+        }
+
+        private void CannyCommandExecute()
+        {
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            image.ConvertToGrey();
+            image.SaveAsBitmap("1GreyTest.bmp");
+            const int StartBorder = 0;
+            const int EndBorder = 1; //border of one for 3x3 mean block
+            var resultImage = new ImageReader.ImageReader();
+            resultImage.Count = image.Count;
+            resultImage.Height = image.Height;
+            resultImage.Width = image.Width;
+            resultImage.depth = image.depth;
+            resultImage.Pixels = new List<byte>(image.Pixels);
+            
+            //Gauss the image first
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                    if (h >= 2 && h < image.Height - 2)
+                    {
+                        if (w >= 2 && w < image.Width - 2)
+                        {
+                            var returnList = this.FindGaussian(w, h, 5, 1.4, image);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+
+            var GaussImage = new ImageReader.ImageReader();
+            GaussImage.Count = resultImage.Count;
+            GaussImage.Height = resultImage.Height;
+            GaussImage.Width = resultImage.Width;
+            GaussImage.depth = resultImage.depth;
+            GaussImage.Pixels = new List<byte>(resultImage.Pixels);
+            GaussImage.SaveAsBitmap("1Gausstest.bmp");
+            
+            var CannyImage = new ImageReader.ImageReader();
+            CannyImage.Count = resultImage.Count;
+            CannyImage.Height = resultImage.Height;
+            CannyImage.Width = resultImage.Width;
+            CannyImage.depth = resultImage.depth;
+            CannyImage.Pixels = new List<byte>(resultImage.Pixels);
+
 
             //then Sobel
             for (var h = 0; h < GaussImage.Height; h++)
@@ -838,15 +927,157 @@ namespace DetectionAndMatching.UI.ViewModels
                             resultImage.SetPixel(w, h, 0, returnList[0]);
                             resultImage.SetPixel(w, h, 1, returnList[1]);
                             resultImage.SetPixel(w, h, 2, returnList[2]);
+
+                            //quantize all angles into the 4 groups.
+                            // This doesn't seem to be very quantized!
+                            //Perhaps an issue here.
+                            CannyImage.SetPixel(w, h, 0, returnList[3]);
+                            CannyImage.SetPixel(w, h, 1, returnList[4]);
+                            CannyImage.SetPixel(w, h, 2, returnList[5]);
                         }
                     }
                 }
             }
-            
+
+            resultImage.SaveAsBitmap("1SobelTest.bmp");
+            CannyImage.SaveAsBitmap("1CannyGradiantTest.bmp");
+            var LinesImage = new ImageReader.ImageReader();
+            LinesImage.Count = image.Count;
+            LinesImage.Height = image.Height;
+            LinesImage.Width = image.Width;
+            LinesImage.depth = image.depth;
+            LinesImage.Pixels = new List<byte>(image.Pixels);
+
+            for (var h = 0; h < CannyImage.Height; h++)
+            {
+                for (var w = 0; w < CannyImage.Width; w++)
+                {
+                    if (h > StartBorder && h < CannyImage.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < CannyImage.Width - EndBorder)
+                        {
+                            //maximum supression?
+                            //Not sure this is working either!
+                            var returnList = this.CannyDetection(w, h, resultImage, CannyImage);
+                            LinesImage.SetPixel(w, h, 0, returnList[0]);
+                            LinesImage.SetPixel(w, h, 1, returnList[1]);
+                            LinesImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+            //compare the linesImage with the resultsimage.
+            //results should be gradiant.
+            //threshold the gradiant on the pixels that have a valid linesImage result??
+
             var fi = new System.IO.FileInfo(LeftPictureLocation);
-            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Sobel" + fi.Name;
-            resultImage.SaveAsBitmap(modifiedName);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Canny" + fi.Name;
+            //resultImage.SaveAsBitmap(modifiedName);
+            LinesImage.SaveAsBitmap(modifiedName);
+
             LoadRightImage(modifiedName);
+        }
+        
+        private List<byte> CannyDetection(int x, int y, ImageReader.ImageReader image, ImageReader.ImageReader thetaImage)
+        {
+            var returnList = new List<byte>();
+
+            var oneR = image.GetPixel(x - 1, y - 1, 0);
+            var twoR = image.GetPixel(x, y - 1, 0);
+            var threeR = image.GetPixel(x + 1, y - 1, 0);
+            var fourR = image.GetPixel(x - 1, y, 0);
+            var fiveR = image.GetPixel(x, y, 0);
+            var sixR = image.GetPixel(x + 1, y, 0);
+            var sevenR = image.GetPixel(x - 1, y + 1, 0);
+            var eightR = image.GetPixel(x, y + 1, 0);
+            var nineR = image.GetPixel(x + 1, y + 1, 0);
+
+            var comparerR = thetaImage.GetPixel(x, y, 0);
+
+            var oneG = image.GetPixel(x - 1, y - 1, 1);
+            var twoG = image.GetPixel(x, y - 1, 1);
+            var threeG = image.GetPixel(x + 1, y - 1, 1);
+            var fourG = image.GetPixel(x - 1, y, 1);
+            var fiveG = image.GetPixel(x, y, 1);
+            var sixG = image.GetPixel(x + 1, y, 1);
+            var sevenG = image.GetPixel(x - 1, y + 1, 1);
+            var eightG = image.GetPixel(x, y + 1, 1);
+            var nineG = image.GetPixel(x + 1, y + 1, 1);
+
+            var oneB = image.GetPixel(x - 1, y - 1, 2);
+            var twoB = image.GetPixel(x, y - 1, 2);
+            var threeB = image.GetPixel(x + 1, y - 1, 2);
+            var fourB = image.GetPixel(x - 1, y, 2);
+            var fiveB = image.GetPixel(x, y, 2);
+            var sixB = image.GetPixel(x + 1, y, 2);
+            var sevenB = image.GetPixel(x - 1, y + 1, 2);
+            var eightB = image.GetPixel(x, y + 1, 2);
+            var nineB = image.GetPixel(x + 1, y + 1, 2);
+
+            var RArray = new List<byte> { oneR, twoR, threeR, fourR, fiveR, sixR, sevenR, eightR, nineR };
+            var GArray = new List<byte> { oneG, twoG, threeG, fourG, fiveG, sixG, sevenG, eightG, nineG };
+            var BArray = new List<byte> { oneB, twoB, threeB, fourB, fiveB, sixB, sevenB, eightB, nineB };
+
+            Dictionary<byte, List<byte>> bubble = new Dictionary<byte, List<byte>>();
+            bubble.Add(comparerR, RArray);
+           // bubble.Add(fiveG, GArray);
+           // bubble.Add(fiveB, BArray);
+            foreach (var item in bubble)
+            {
+                byte RV = 0;
+                bool set = false;
+                if (item.Key == 0)
+                {
+                    var first = item.Value[5];
+                    var second = item.Value[3];
+                    if (item.Value[4] > first && item.Value[4] > second)
+                    {
+                        RV = item.Value[4];
+                    }
+                }
+                else if (item.Key == 85)//90
+                {
+                    var first = item.Value[7];
+                    var second = item.Value[1];
+                    if (item.Value[4] > first && item.Value[4] > second)
+                    {
+                        RV = item.Value[4];
+                    }
+                }
+                else if (item.Key == 170)//45
+                {
+                    var first = item.Value[8];
+                    var second = item.Value[0];
+                    if (item.Value[4] > first && item.Value[4] > second)
+                    {
+                        RV = item.Value[4];
+                    }
+                }
+                else if (item.Key == 255)//135
+                {
+                    var first = item.Value[2];
+                    var second = item.Value[6];
+                    if (item.Value[4] > first && item.Value[4] > second)
+                    {
+                        RV = item.Value[4];
+                    }
+                }
+
+                returnList.Add(RV);
+                returnList.Add(RV);
+                returnList.Add(RV);
+            }
+
+//            So, three pixels in a 3 × 3 around pixel (x, y) are examined:
+//• If ′(x, y) = 0◦, then the pixels (x + 1, y), (x, y), and (x − 1, y) are examined.
+//• If ′(x, y) = 90◦, then the pixels (x, y + 1), (x, y), and (x, y − 1) are examined.
+//• If ′(x, y) = 45◦, then the pixels (x + 1, y + 1), (x, y), and (x − 1, y − 1) are examined.
+//• If ′(x, y) = 135◦, then the pixels (x + 1, y − 1), (x, y), and (x − 1, y + 1) are examined.
+//If pixel (x, y) has the highest gradient magnitude of the three pixels examined, it is kept as an edge. If one of the
+//other two pixels has a higher gradient magnitude, then pixel (x, y) is not on the “center” of the edge and should not
+//be classified as an edge pixel.
+
+            return returnList;
         }
 
         private List<byte> SobelDetection(int x, int y, ImageReader.ImageReader image)
@@ -921,9 +1152,153 @@ namespace DetectionAndMatching.UI.ViewModels
             var newR = Math.Abs(GXR) + Math.Abs(GYR);
             var newG = Math.Abs(GXG) + Math.Abs(GYG);
             var newB = Math.Abs(GXB) + Math.Abs(GYB);
-
+            
             //TODO: add this for Canny Detector
-            //var thetaR = Math.Atan(GYR / GXR);
+            double thetaR;
+            //if (GXR == 0)
+            //{
+            //    if (GYR == 0)
+            //    {
+            //        thetaR = 0;
+            //    }
+            //    else
+            //    {
+            //        thetaR = 90;
+            //    }
+            //}
+            //else
+            //{
+            //    thetaR = Math.Atan(GYR / GXR) * (180 / Math.PI);
+                
+            //}
+            double thetaG;
+            //if (GXG == 0)
+            //{
+            //    if (GYG == 0)
+            //    {
+            //        thetaG = 0;
+            //    }
+            //    else
+            //    {
+            //        thetaG = 90;
+            //    }
+            //}
+            //else
+            //{
+            //    thetaG = Math.Atan(GYG / GXG) * (180 / Math.PI);
+            //}
+            double thetaB;
+            //if (GXB == 0)
+            //{
+            //    if (GYB == 0)
+            //    {
+            //        thetaB = 0;
+            //    }
+            //    else
+            //    {
+            //        thetaB = 90;
+            //    }
+            //}
+            //else
+            //{
+            //    thetaB = Math.Atan(GYB / GXB) * (180 / Math.PI);
+            //}
+
+            thetaR = Math.Atan2(GYR, GXR) * (180 / Math.PI);
+            thetaG = Math.Atan2(GYG, GXG) * (180 / Math.PI);
+            thetaB = Math.Atan2(GYB, GXB) * (180 / Math.PI);
+            thetaR += 180;
+            thetaG += 180;
+            thetaB += 180;
+
+            List<double> thetas = new List<double>();
+            thetas.Add(thetaR);
+            thetas.Add(thetaG);
+            thetas.Add(thetaB);
+
+            List<byte> convertedThetas = new List<byte>();
+            /*
+             * Compute ′ by rounding the angle  to one of four directions 0◦, 45◦, 90◦, or 135◦.
+             * Obviously for edges, 180◦ = 0◦, 225◦ = 45◦, etc. This means  in the ranges
+             * [−22.5◦...22.5◦] and [157.5◦...202.5◦] would “round” to ′ = 0◦. For a pictoral
+             * representation, each edge take on one of for colors: Here, the colors would repeat
+             * on the lower half of the circle (green around 225◦, blue around 270◦, and red around 315◦).
+             * 
+             * 
+             * 
+             * if((thisangle <22.5&&thisangle>0)&&(thisangle<202.5&&thisangle>157.5)&&(thisangle<360&&thisangle>337.5))
+             * {
+             * }
+             * 0 to 22.5
+157.5 to 202.5
+337.5 to 360
+
+0
+ 
+
+             * if ((thisAngle < 67.5 && thisAngle > 22.5) && (thisAngle < 247.5 && thisAngle > 202.5)
+                  )
+                {
+                }
+22.5 to 67.5
+202.5 to 247.5
+
+1
+ 
+
+             * if ((thisAngle < 112.5 && thisAngle > 67.5) && (thisAngle < 292.5 && thisAngle > 247.5))
+                {
+                    //2
+                }
+67.5 to 112.5
+247.5 to 292.5
+
+2
+ 
+
+             * if ((thisAngle < 157.5 && thisAngle > 112.5) && (thisAngle < 337.5 && thisAngle > 292.5))
+                {
+                    //3
+                }
+112.5 to 157.5
+292.5 to 337.5
+
+
+             * */
+            foreach (var thisAngle in thetas)
+            {
+                bool set = false;
+                //if (((thisAngle < 22.5) && (thisAngle > -22.5)) || (thisAngle > 157.5) || (thisAngle < -157.5)) convertedThetas.Add(0); //  newAngle = 0;
+                //if (((thisAngle > 22.5) && (thisAngle < 67.5)) || ((thisAngle < -112.5) && (thisAngle > -157.5))) convertedThetas.Add(45); // newAngle = 45;
+                //if (((thisAngle > 67.5) && (thisAngle < 112.5)) || ((thisAngle < -67.5) && (thisAngle > -112.5))) convertedThetas.Add(90); //newAngle = 90;
+                //if (((thisAngle > 112.5) && (thisAngle < 157.5)) || ((thisAngle < -22.5) && (thisAngle > -67.5))) convertedThetas.Add(135); //newAngle = 135;
+                //  convertedThetas.Add(Convert.ToByte(Math.Abs(thisAngle)));
+                if ((thisAngle < 22.5 && thisAngle > 0) || (thisAngle < 202.5 && thisAngle > 157.5)
+                    || (thisAngle <= 360 && thisAngle > 337.5))
+                {
+                    convertedThetas.Add(0);
+                    set = true;
+                }
+                if ((thisAngle < 67.5 && thisAngle > 22.5) || (thisAngle < 247.5 && thisAngle > 202.5))
+                {
+                    convertedThetas.Add(85);
+                    set = true;
+                }
+                if ((thisAngle < 112.5 && thisAngle > 67.5) || (thisAngle < 292.5 && thisAngle > 247.5))
+                {
+                    convertedThetas.Add(170);
+                    set = true;
+                }
+                if ((thisAngle < 157.5 && thisAngle > 112.5) || (thisAngle < 337.5 && thisAngle > 292.5))
+                {
+                    convertedThetas.Add(255);
+                    set = true;
+                }
+                if (set == false)
+                {
+                    int stopper = -1;
+                }
+            }
 
             if (newR > 255) newR = 255;
             if (newG > 255) newG = 255;
@@ -934,99 +1309,101 @@ namespace DetectionAndMatching.UI.ViewModels
             returnList.Add((byte)r);
             returnList.Add((byte)g);
             returnList.Add((byte)b);
+            
+            returnList.AddRange(convertedThetas);
+
 
             return returnList;
-
         }
 
         public void KrischCommandExecute()
- {
-   //Bitmap ret = new Bitmap(image.Width, image.Height);
-   //for (int i = 1; i < image.Width - 1; i++)
-   //{
-   //    for (int j = 1; j < image.Height - 1; j++)
-   //    {
-   //       Color cr = image.GetPixel(i + 1, j);
-   //       Color cl = image.GetPixel(i - 1, j);
-   //       Color cu = image.GetPixel(i, j - 1);
-   //       Color cd = image.GetPixel(i, j + 1);
-   //       Color cld = image.GetPixel(i - 1, j + 1);
-   //       Color clu = image.GetPixel(i - 1, j - 1);
-   //       Color crd = image.GetPixel(i + 1, j + 1);
-   //       Color cru = image.GetPixel(i + 1, j - 1);
-   //       int power = getMaxD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
-   //        if (power > 50)
-   //          ret.SetPixel(i, j, Color.Yellow);
-   //        else
-   //           ret.SetPixel(i, j, Color.Black);
-   //       }
-   //   }
-   //   return ret;
+        {
+            //Bitmap ret = new Bitmap(image.Width, image.Height);
+            //for (int i = 1; i < image.Width - 1; i++)
+            //{
+            //    for (int j = 1; j < image.Height - 1; j++)
+            //    {
+            //       Color cr = image.GetPixel(i + 1, j);
+            //       Color cl = image.GetPixel(i - 1, j);
+            //       Color cu = image.GetPixel(i, j - 1);
+            //       Color cd = image.GetPixel(i, j + 1);
+            //       Color cld = image.GetPixel(i - 1, j + 1);
+            //       Color clu = image.GetPixel(i - 1, j - 1);
+            //       Color crd = image.GetPixel(i + 1, j + 1);
+            //       Color cru = image.GetPixel(i + 1, j - 1);
+            //       int power = getMaxD(cr.R, cl.R, cu.R, cd.R, cld.R, clu.R, cru.R, crd.R);
+            //        if (power > 50)
+            //          ret.SetPixel(i, j, Color.Yellow);
+            //        else
+            //           ret.SetPixel(i, j, Color.Black);
+            //       }
+            //   }
+            //   return ret;
 
-     var image = new ImageReader.ImageReader(LeftPictureLocation);
-     image.ConvertToGrey();
-     const int StartBorder = 0;
-     const int EndBorder = 1; //border of one for 3x3 mean block
-     var resultImage = new ImageReader.ImageReader();
-     resultImage.Count = image.Count;
-     resultImage.Height = image.Height;
-     resultImage.Width = image.Width;
-     resultImage.depth = image.depth;
-     resultImage.Pixels = new List<byte>(image.Pixels);
+            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            image.ConvertToGrey();
+            const int StartBorder = 0;
+            const int EndBorder = 1; //border of one for 3x3 mean block
+            var resultImage = new ImageReader.ImageReader();
+            resultImage.Count = image.Count;
+            resultImage.Height = image.Height;
+            resultImage.Width = image.Width;
+            resultImage.depth = image.depth;
+            resultImage.Pixels = new List<byte>(image.Pixels);
 
 
 
-     //Gauss the image first
-     for (var h = 0; h < image.Height; h++)
-     {
-         for (var w = 0; w < image.Width; w++)
-         {
-             if (h >= 2 && h < image.Height - 2)
-             {
-                 if (w >= 2 && w < image.Width - 2)
-                 {
-                     var returnList = this.FindGaussian(w, h, 5, 1.4, image);
-                     resultImage.SetPixel(w, h, 0, returnList[0]);
-                     resultImage.SetPixel(w, h, 1, returnList[1]);
-                     resultImage.SetPixel(w, h, 2, returnList[2]);
-                 }
-             }
-         }
-     }
+            //Gauss the image first
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                    if (h >= 2 && h < image.Height - 2)
+                    {
+                        if (w >= 2 && w < image.Width - 2)
+                        {
+                            var returnList = this.FindGaussian(w, h, 5, 1.4, image);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
 
-     var GaussImage = new ImageReader.ImageReader();
-     GaussImage.Count = resultImage.Count;
-     GaussImage.Height = resultImage.Height;
-     GaussImage.Width = resultImage.Width;
-     GaussImage.depth = resultImage.depth;
-     GaussImage.Pixels = new List<byte>(resultImage.Pixels);
+            var GaussImage = new ImageReader.ImageReader();
+            GaussImage.Count = resultImage.Count;
+            GaussImage.Height = resultImage.Height;
+            GaussImage.Width = resultImage.Width;
+            GaussImage.depth = resultImage.depth;
+            GaussImage.Pixels = new List<byte>(resultImage.Pixels);
 
-     
-     for (var h = 0; h < GaussImage.Height; h++)
-     {
-         for (var w = 0; w < GaussImage.Width; w++)
-         {
-             if (h > StartBorder && h < GaussImage.Height - EndBorder)
-             {
-                 if (w > StartBorder && w < GaussImage.Width - EndBorder)
-                 {
-                     //can average here
-                     var returnList = this.Krisch(w, h, GaussImage);
-                     resultImage.SetPixel(w, h, 0, returnList[0]);
-                     resultImage.SetPixel(w, h, 1, returnList[1]);
-                     resultImage.SetPixel(w, h, 2, returnList[2]);
-                 }
-             }
-         }
-     }
 
-     var fi = new System.IO.FileInfo(LeftPictureLocation);
-     var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Krisch" + fi.Name;
-     resultImage.SaveAsBitmap(modifiedName);
-     LoadRightImage(modifiedName);
-}
+            for (var h = 0; h < GaussImage.Height; h++)
+            {
+                for (var w = 0; w < GaussImage.Width; w++)
+                {
+                    if (h > StartBorder && h < GaussImage.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < GaussImage.Width - EndBorder)
+                        {
+                            //can average here
+                            var returnList = this.Krisch(w, h, GaussImage);
+                            resultImage.SetPixel(w, h, 0, returnList[0]);
+                            resultImage.SetPixel(w, h, 1, returnList[1]);
+                            resultImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
 
-private ICommand _krischCommand;
+            var fi = new System.IO.FileInfo(LeftPictureLocation);
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Krisch" + fi.Name;
+            resultImage.SaveAsBitmap(modifiedName);
+            LoadRightImage(modifiedName);
+        }
+
+        private ICommand _krischCommand;
 public ICommand KrischCommand
 {
     get

@@ -46,6 +46,7 @@
                     </MenuItem>
                     <MenuItem Header="Sobel" Command="{Binding SobelCommand}"></MenuItem>
                     <MenuItem Header="Krisch" Command="{Binding KrischCommand}"></MenuItem>
+                    <MenuItem Header="Canny" Command="{Binding CannyCommand}"></MenuItem>
                 </MenuItem>
                 
                 <MenuItem Header="_Options">
