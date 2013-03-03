@@ -14,7 +14,13 @@ using PixelMap;
 
 namespace DetectionAndMatching.UI.ViewModels
 {
+    using System.IO;
+
     using ImageLib;
+
+    using ImageReader;
+
+    using Point = System.Windows.Point;
 
     public class MainWindowViewModel : INotifyPropertyChanged
     {
@@ -154,7 +160,7 @@ namespace DetectionAndMatching.UI.ViewModels
             RightPictureLocation = filename;
             load_result_image(RightPictureLocation);
             //var bi = new BitmapImage(new Uri(LeftPictureLocation, UriKind.RelativeOrAbsolute));
-            var bi = new ImageReader.ImageReader(RightPictureLocation);
+            var bi = new ImageReader(RightPictureLocation);
             
             HistogramWindowViewModel.LuminanceHistogramPointsR = ConvertToPointCollection(bi.luminance);
             HistogramWindowViewModel.RedColorHistogramPointsR = ConvertToPointCollection(bi.r);
@@ -197,7 +203,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 LeftPictureLocation = filename;
                 load_query_image(LeftPictureLocation);
                 
-                var bi = new ImageReader.ImageReader(LeftPictureLocation);
+                var bi = new ImageReader(LeftPictureLocation);
                 var hwvm = new HistogramWindowViewModel
                                {
                                    LuminanceHistogramPoints = ConvertToPointCollection(bi.luminance),
@@ -374,12 +380,12 @@ namespace DetectionAndMatching.UI.ViewModels
 
         private void LocalMeanCommandExecute()
         {
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
             int stroke = image.Width * 3;
             const int StartBorder = 0;
             const int EndBorder = 1; //border of one for 3x3 mean block
 
-            var resultImage = new ImageReader.ImageReader();
+            var resultImage = new ImageReader();
             resultImage.Count = image.Count;
             resultImage.Height = image.Height;
             resultImage.Width = image.Width;
@@ -415,7 +421,7 @@ namespace DetectionAndMatching.UI.ViewModels
             LoadRightImage(modifiedName);
         }
 
-        private List<byte> Average(int x, int y, int squareSize, ImageReader.ImageReader image)
+        private List<byte> Average(int x, int y, int squareSize, ImageReader image)
         {
             var returnList = new List<byte>();
 
@@ -481,11 +487,11 @@ namespace DetectionAndMatching.UI.ViewModels
 
         private void LocalMedianCommandExecute()
         {
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
             int stroke = image.Width * 3;
             const int StartBorder = 0;
             const int EndBorder = 1; //border of one for 3x3 mean block
-            var resultImage = new ImageReader.ImageReader();
+            var resultImage = new ImageReader();
             resultImage.Count = image.Count;
             resultImage.Height = image.Height;
             resultImage.Width = image.Width;
@@ -519,7 +525,7 @@ namespace DetectionAndMatching.UI.ViewModels
             resultImage.SaveAsBitmap(modifiedName);
             LoadRightImage(modifiedName);
         }
-        private List<byte> FindMedians(int x, int y, int squareSize, ImageReader.ImageReader image)
+        private List<byte> FindMedians(int x, int y, int squareSize, ImageReader image)
         {
             var returnList = new List<byte>();
 
@@ -613,12 +619,12 @@ namespace DetectionAndMatching.UI.ViewModels
         {
             double sigma = Convert.ToDouble(sigmaStringValue);
             //double sigma = 4;
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
             int stroke = image.Width * 3;
             const int StartBorder = 5;
             //need to skip 5 spaces to make the 11x11 i think
             const int EndBorder = 5; //border of ? for 11x11 for block
-            var resultImage = new ImageReader.ImageReader();
+            var resultImage = new ImageReader();
             resultImage.Count = image.Count;
             resultImage.Height = image.Height;
             resultImage.Width = image.Width;
@@ -652,7 +658,7 @@ namespace DetectionAndMatching.UI.ViewModels
             LoadRightImage(modifiedName);
         }
         
-        private List<byte> FindGaussian(int x, int y, int size, double sigma, ImageReader.ImageReader image)
+        private List<byte> FindGaussian(int x, int y, int size, double sigma, ImageReader image)
         {
             var locationP = (size - 1) / 2;
             GaussianBlur gb = new GaussianBlur(sigma, size);
@@ -786,11 +792,11 @@ namespace DetectionAndMatching.UI.ViewModels
 
         private void SobelCommandExecute()
         {
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
             image.ConvertToGrey();
             const int StartBorder = 0;
             const int EndBorder = 1; //border of one for 3x3 mean block
-            var resultImage = new ImageReader.ImageReader();
+            var resultImage = new ImageReader();
             resultImage.Count = image.Count;
             resultImage.Height = image.Height;
             resultImage.Width = image.Width;
@@ -815,7 +821,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 }
             }
 
-            var GaussImage = new ImageReader.ImageReader();
+            var GaussImage = new ImageReader();
             GaussImage.Count = resultImage.Count;
             GaussImage.Height = resultImage.Height;
             GaussImage.Width = resultImage.Width;
@@ -867,12 +873,17 @@ namespace DetectionAndMatching.UI.ViewModels
 
         private void CannyCommandExecute()
         {
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+           // CannyEdgeDetector ce = new CannyEdgeDetector();
+            //ce.Apply(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
             image.ConvertToGrey();
             image.SaveAsBitmap("1GreyTest.bmp");
+          //  CannyEdgeDetector ce = new CannyEdgeDetector();
+          //  ce.Apply("1GreyTest.bmp");
+
             const int StartBorder = 0;
             const int EndBorder = 1; //border of one for 3x3 mean block
-            var resultImage = new ImageReader.ImageReader();
+            var resultImage = new ImageReader();
             resultImage.Count = image.Count;
             resultImage.Height = image.Height;
             resultImage.Width = image.Width;
@@ -897,7 +908,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 }
             }
 
-            var GaussImage = new ImageReader.ImageReader();
+            var GaussImage = new ImageReader();
             GaussImage.Count = resultImage.Count;
             GaussImage.Height = resultImage.Height;
             GaussImage.Width = resultImage.Width;
@@ -905,7 +916,7 @@ namespace DetectionAndMatching.UI.ViewModels
             GaussImage.Pixels = new List<byte>(resultImage.Pixels);
             GaussImage.SaveAsBitmap("1Gausstest.bmp");
             
-            var CannyImage = new ImageReader.ImageReader();
+            var CannyImage = new ImageReader();
             CannyImage.Count = resultImage.Count;
             CannyImage.Height = resultImage.Height;
             CannyImage.Width = resultImage.Width;
@@ -928,20 +939,62 @@ namespace DetectionAndMatching.UI.ViewModels
                             resultImage.SetPixel(w, h, 1, returnList[1]);
                             resultImage.SetPixel(w, h, 2, returnList[2]);
 
-                            //quantize all angles into the 4 groups.
-                            // This doesn't seem to be very quantized!
-                            //Perhaps an issue here.
-                            CannyImage.SetPixel(w, h, 0, returnList[3]);
-                            CannyImage.SetPixel(w, h, 1, returnList[4]);
-                            CannyImage.SetPixel(w, h, 2, returnList[5]);
+                            ////quantize all angles into the 4 groups.
+                            //// This doesn't seem to be very quantized!
+                            ////Perhaps an issue here.
+                            //CannyImage.SetPixel(w, h, 0, returnList[3]);
+                            //CannyImage.SetPixel(w, h, 1, returnList[4]);
+                            //CannyImage.SetPixel(w, h, 2, returnList[5]);
                         }
                     }
                 }
             }
+            List<double> GM = new List<double>();
+            double maxGrad = double.NegativeInfinity;
+            var HoldingTank = new double[GaussImage.Width,GaussImage.Height];
+            var orientations = new double[GaussImage.Width, GaussImage.Height];
+            for (var h = 0; h < GaussImage.Height; h++)
+            {
+                for (var w = 0; w < GaussImage.Width; w++)
+                {
+                    if (h > StartBorder && h < GaussImage.Height - EndBorder)
+                    {
+                        if (w > StartBorder && w < GaussImage.Width - EndBorder)
+                        {
+                            //can average here
+                            var returnList = this.GradiantDetection(w, h, GaussImage);
+                            //resultImage.SetPixel(w, h, 0, returnList[0]);
+                            //resultImage.SetPixel(w, h, 1, returnList[1]);
+                            //resultImage.SetPixel(w, h, 2, returnList[2]);
+                            GM.Add(returnList[0]);
+                            HoldingTank[w, h] = returnList[0];
+                            if (returnList[0] > maxGrad)
+                            {
+                                maxGrad = returnList[0];
+                            }
+                            orientations[w, h] = returnList[1];
+                            //quantize all angles into the 4 groups.
+                            // This doesn't seem to be very quantized!
+                            //Perhaps an issue here.
+                            //CannyImage.SetPixel(w, h, 0, returnList[3]);
+                            //CannyImage.SetPixel(w, h, 1, returnList[4]);
+                            //CannyImage.SetPixel(w, h, 2, returnList[5]);
+                        }
+                        else{GM.Add(0);}
+                    }
+                    else { GM.Add(0); }
+                }
+            }
+            //Console.WriteLine("Gradiant:");
+            //foreach (var item in GM)
+            //{
+            //    Console.WriteLine(item);
+            //}
+
 
             resultImage.SaveAsBitmap("1SobelTest.bmp");
             CannyImage.SaveAsBitmap("1CannyGradiantTest.bmp");
-            var LinesImage = new ImageReader.ImageReader();
+            var LinesImage = new ImageReader();
             LinesImage.Count = image.Count;
             LinesImage.Height = image.Height;
             LinesImage.Width = image.Width;
@@ -958,7 +1011,8 @@ namespace DetectionAndMatching.UI.ViewModels
                         {
                             //maximum supression?
                             //Not sure this is working either!
-                            var returnList = this.CannyDetection(w, h, resultImage, CannyImage);
+                            //var returnList = this.CannyDetection(w, h, resultImage, CannyImage);
+                            var returnList = this.CannyDetection(w, h, HoldingTank, orientations,maxGrad);
                             LinesImage.SetPixel(w, h, 0, returnList[0]);
                             LinesImage.SetPixel(w, h, 1, returnList[1]);
                             LinesImage.SetPixel(w, h, 2, returnList[2]);
@@ -966,21 +1020,53 @@ namespace DetectionAndMatching.UI.ViewModels
                     }
                 }
             }
+            LinesImage.SaveAsBitmap("1LinesCannyImage.bmp");
             //compare the linesImage with the resultsimage.
             //results should be gradiant.
             //threshold the gradiant on the pixels that have a valid linesImage result??
 
+            var EdgeImage = new ImageReader();
+            EdgeImage.Count = image.Count;
+            EdgeImage.Height = image.Height;
+            EdgeImage.Width = image.Width;
+            EdgeImage.depth = image.depth;
+            EdgeImage.Pixels = new List<byte>(image.Pixels);
+
+            int CEStartBorder = 2;
+            int CEEndBorder = 2;
+            //TODO: make this more configurable
+            //can't be right on the edge for the 5x5 window
+            for (var h = 0; h < LinesImage.Height - 2; h++)
+            {
+                for (var w = 0; w < LinesImage.Width-2; w++)
+                {
+                    if (h > CEStartBorder && h < LinesImage.Height - CEEndBorder)
+                    {
+                        if (w > CEStartBorder && w < LinesImage.Width - CEEndBorder)
+                        {
+                            var returnList = this.ThresholdSupression(w, h, 20, 100, LinesImage);
+                            EdgeImage.SetPixel(w, h, 0, returnList[0]);
+                            EdgeImage.SetPixel(w, h, 1, returnList[1]);
+                            EdgeImage.SetPixel(w, h, 2, returnList[2]);
+                        }
+                    }
+                }
+            }
+
+
             var fi = new System.IO.FileInfo(LeftPictureLocation);
-            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "Canny" + fi.Name;
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "EdgeCanny" + fi.Name;
             //resultImage.SaveAsBitmap(modifiedName);
-            LinesImage.SaveAsBitmap(modifiedName);
+            //LinesImage.SaveAsBitmap(modifiedName);
+            EdgeImage.SaveAsBitmap(modifiedName);
 
             LoadRightImage(modifiedName);
         }
-        
-        private List<byte> CannyDetection(int x, int y, ImageReader.ImageReader image, ImageReader.ImageReader thetaImage)
+
+        private List<byte> ThresholdSupression(int x, int y,int thresholdLow, int thresholdHigh, ImageReader image)
         {
             var returnList = new List<byte>();
+
 
             var oneR = image.GetPixel(x - 1, y - 1, 0);
             var twoR = image.GetPixel(x, y - 1, 0);
@@ -992,7 +1078,214 @@ namespace DetectionAndMatching.UI.ViewModels
             var eightR = image.GetPixel(x, y + 1, 0);
             var nineR = image.GetPixel(x + 1, y + 1, 0);
 
-            var comparerR = thetaImage.GetPixel(x, y, 0);
+            var smallWindow = new List<byte> { oneR, twoR, threeR, fourR, sixR, sevenR, eightR, nineR };
+            var pixelToTest = fiveR;
+
+            int size = 5;
+            var locationP = (size - 1) / 2;
+            
+            List<byte> LargeWindow = new List<byte>();
+            for (int j = -locationP; j < locationP + 1; j++)
+            {
+                for (int i = -locationP; i < locationP + 1; i++)
+                {
+                    LargeWindow.Add(image.GetPixel(x + i, y + j, 0));
+                }
+            }
+
+            /*
+             * • If pixel (x, y) has gradient magnitude less than tlow discard the edge (write out black).
+• If pixel (x, y) has gradient magnitude greater than thigh keep the edge (write out white).
+
+             * 
+             * */
+            if (pixelToTest < thresholdLow)
+            {
+                returnList.Add(0);
+                returnList.Add(0);
+                returnList.Add(0);
+            }
+            else if (pixelToTest >= thresholdHigh)
+            {
+                returnList.Add(255);
+                returnList.Add(255);
+                returnList.Add(255);
+            }
+            else if (pixelToTest < thresholdHigh && pixelToTest >= thresholdLow)
+            {
+                returnList = this.WindowThresholdSuppresion(thresholdLow, thresholdHigh, smallWindow, LargeWindow);
+            }
+            else
+            {
+                throw new InvalidDataException("Shouldn't be here!");
+            }
+
+            return returnList;
+        }
+
+        private List<byte> WindowThresholdSuppresion(int thresholdLow,int thresholdHigh, List<byte> smallWindow, List<byte> largeWindow)
+        {
+            /*
+             * • If pixel (x, y) has gradient magnitude between tlow and thigh and any of its neighbors in a 3 × 3 region around
+it have gradient magnitudes greater than thigh, keep the edge (write out white).
+• If none of pixel (x, y)’s neighbors have high gradient magnitudes but at least one falls between tlow and thigh,
+search the 5 × 5 region to see if any of these pixels have a magnitude greater than thigh. If so, keep the edge
+(write out white).
+• Else, discard the edge (write out black).
+             * */
+            var returnList = new List<byte>();
+            bool set = false;
+            bool oneInRange = false;
+            foreach (var item in smallWindow)
+            {
+                if (item > thresholdHigh)
+                {
+                    set = true;
+                }
+                if (item > thresholdLow && item < thresholdHigh)
+                {
+                    oneInRange = true;
+                }
+            }
+
+            if (set == false && oneInRange)
+            {
+                foreach (var item in largeWindow)
+                {
+                    if (item > thresholdHigh)
+                    {
+                        set = true;
+                        break;
+                    }
+                }
+            }
+            if (set)
+            {
+                returnList.Add(255);
+                returnList.Add(255);
+                returnList.Add(255);
+            }
+            else
+            {
+                returnList.Add(0);
+                returnList.Add(0);
+                returnList.Add(0);
+            }
+            return returnList;
+        }
+
+        private List<byte> CannyDetection(int x, int y, double[,] image, double[,] thetaImage, double maxGradient)
+        {
+            var returnList = new List<byte>();
+
+            var oneR = image[x - 1, y - 1];
+            var twoR = image[x, y - 1];
+            var threeR = image[x + 1, y - 1];
+            var fourR = image[x - 1, y];
+            var fiveR = image[x, y];
+            var sixR = image[x + 1, y];
+            var sevenR = image[x - 1, y + 1];
+            var eightR = image[x, y + 1];
+            var nineR = image[x + 1, y + 1];
+
+            var comparerR = thetaImage[x, y];
+
+            //var oneG = image.GetPixel(x - 1, y - 1, 1);
+            //var twoG = image.GetPixel(x, y - 1, 1);
+            //var threeG = image.GetPixel(x + 1, y - 1, 1);
+            //var fourG = image.GetPixel(x - 1, y, 1);
+            //var fiveG = image.GetPixel(x, y, 1);
+            //var sixG = image.GetPixel(x + 1, y, 1);
+            //var sevenG = image.GetPixel(x - 1, y + 1, 1);
+            //var eightG = image.GetPixel(x, y + 1, 1);
+            //var nineG = image.GetPixel(x + 1, y + 1, 1);
+
+            //var oneB = image.GetPixel(x - 1, y - 1, 2);
+            //var twoB = image.GetPixel(x, y - 1, 2);
+            //var threeB = image.GetPixel(x + 1, y - 1, 2);
+            //var fourB = image.GetPixel(x - 1, y, 2);
+            //var fiveB = image.GetPixel(x, y, 2);
+            //var sixB = image.GetPixel(x + 1, y, 2);
+            //var sevenB = image.GetPixel(x - 1, y + 1, 2);
+            //var eightB = image.GetPixel(x, y + 1, 2);
+            //var nineB = image.GetPixel(x + 1, y + 1, 2);
+
+            var RArray = new List<double> { oneR, twoR, threeR, fourR, fiveR, sixR, sevenR, eightR, nineR };
+
+           
+
+                double RV = 0;
+                bool set = false;
+                if (comparerR == 0)
+                {
+                    var first = image[x + 1, y];
+                    var second = image[x - 1, y];
+                    if (image[x, y] < first || image[x, y] < second)
+                    {
+                        RV = image[x, y];
+                    }
+                }
+                else if (comparerR == 90)//90
+                {
+                    var first = image[x, y + 1];
+                    var second = image[x, y - 1];
+                    if (image[x, y] < first || image[x, y] < second)
+                    {
+                        RV = image[x, y];
+                    }
+                }
+                else if (comparerR == 45)//45
+                {
+                    var first = image[x + 1, y + 1];
+                    var second = image[x - 1, y - 1];
+                    if (image[x, y] < first || image[x, y] < second)
+                    {
+                        RV = image[x, y];
+                    }
+                }
+                else if (comparerR == 135)//135
+                {
+                    var first = image[x + 1, y - 1];
+                    var second = image[x - 1, y + 1];
+                    if (image[x, y] < first || image[x, y] < second)
+                    {
+                        RV = image[x, y];
+                    }
+                }
+                
+                if (RV != 0)
+                {
+                    //Console.WriteLine((RV / maxGradient * 255));
+                }
+                returnList.Add((byte)(RV / maxGradient * 255));
+                returnList.Add((byte)(RV / maxGradient * 255));
+                returnList.Add((byte)(RV / maxGradient * 255));
+            //}
+
+//            So, three pixels in a 3 × 3 around pixel (x, y) are examined:
+//• If ′(x, y) = 0◦, then the pixels (x + 1, y), (x, y), and (x − 1, y) are examined.
+//• If ′(x, y) = 90◦, then the pixels (x, y + 1), (x, y), and (x, y − 1) are examined.
+//• If ′(x, y) = 45◦, then the pixels (x + 1, y + 1), (x, y), and (x − 1, y − 1) are examined.
+//• If ′(x, y) = 135◦, then the pixels (x + 1, y − 1), (x, y), and (x − 1, y + 1) are examined.
+//If pixel (x, y) has the highest gradient magnitude of the three pixels examined, it is kept as an edge. If one of the
+//other two pixels has a higher gradient magnitude, then pixel (x, y) is not on the “center” of the edge and should not
+//be classified as an edge pixel.
+
+            return returnList;
+        }
+        private List<double> GradiantDetection(int x, int y, ImageReader image)
+        {
+            var returnList = new List<double>();
+
+            var oneR = image.GetPixel(x - 1, y - 1, 0);
+            var twoR = image.GetPixel(x, y - 1, 0);
+            var threeR = image.GetPixel(x + 1, y - 1, 0);
+            var fourR = image.GetPixel(x - 1, y, 0);
+            var fiveR = image.GetPixel(x, y, 0);
+            var sixR = image.GetPixel(x + 1, y, 0);
+            var sevenR = image.GetPixel(x - 1, y + 1, 0);
+            var eightR = image.GetPixel(x, y + 1, 0);
+            var nineR = image.GetPixel(x + 1, y + 1, 0);
 
             var oneG = image.GetPixel(x - 1, y - 1, 1);
             var twoG = image.GetPixel(x, y - 1, 1);
@@ -1013,74 +1306,97 @@ namespace DetectionAndMatching.UI.ViewModels
             var sevenB = image.GetPixel(x - 1, y + 1, 2);
             var eightB = image.GetPixel(x, y + 1, 2);
             var nineB = image.GetPixel(x + 1, y + 1, 2);
-
+            
+            var GX = new List<int> { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+            var GY = new List<int> { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
             var RArray = new List<byte> { oneR, twoR, threeR, fourR, fiveR, sixR, sevenR, eightR, nineR };
             var GArray = new List<byte> { oneG, twoG, threeG, fourG, fiveG, sixG, sevenG, eightG, nineG };
             var BArray = new List<byte> { oneB, twoB, threeB, fourB, fiveB, sixB, sevenB, eightB, nineB };
 
-            Dictionary<byte, List<byte>> bubble = new Dictionary<byte, List<byte>>();
-            bubble.Add(comparerR, RArray);
-           // bubble.Add(fiveG, GArray);
-           // bubble.Add(fiveB, BArray);
-            foreach (var item in bubble)
-            {
-                byte RV = 0;
-                bool set = false;
-                if (item.Key == 0)
-                {
-                    var first = item.Value[5];
-                    var second = item.Value[3];
-                    if (item.Value[4] > first && item.Value[4] > second)
-                    {
-                        RV = item.Value[4];
-                    }
-                }
-                else if (item.Key == 85)//90
-                {
-                    var first = item.Value[7];
-                    var second = item.Value[1];
-                    if (item.Value[4] > first && item.Value[4] > second)
-                    {
-                        RV = item.Value[4];
-                    }
-                }
-                else if (item.Key == 170)//45
-                {
-                    var first = item.Value[8];
-                    var second = item.Value[0];
-                    if (item.Value[4] > first && item.Value[4] > second)
-                    {
-                        RV = item.Value[4];
-                    }
-                }
-                else if (item.Key == 255)//135
-                {
-                    var first = item.Value[2];
-                    var second = item.Value[6];
-                    if (item.Value[4] > first && item.Value[4] > second)
-                    {
-                        RV = item.Value[4];
-                    }
-                }
+            int GXR = 0;
+            int GXG = 0;
+            int GXB = 0;
+            int GYR = 0;
+            int GYG = 0;
+            int GYB = 0;
 
-                returnList.Add(RV);
-                returnList.Add(RV);
-                returnList.Add(RV);
+            for (int i = 0; i < 9; i++)
+            {
+                GXR += GX[i] * RArray[i];
+                GXG += GX[i] * GArray[i];
+                GXB += GX[i] * BArray[i];
+
+                GYR += GY[i] * RArray[i];
+                GYG += GY[i] * GArray[i];
+                GYB += GY[i] * BArray[i];
             }
 
-//            So, three pixels in a 3 × 3 around pixel (x, y) are examined:
-//• If ′(x, y) = 0◦, then the pixels (x + 1, y), (x, y), and (x − 1, y) are examined.
-//• If ′(x, y) = 90◦, then the pixels (x, y + 1), (x, y), and (x, y − 1) are examined.
-//• If ′(x, y) = 45◦, then the pixels (x + 1, y + 1), (x, y), and (x − 1, y − 1) are examined.
-//• If ′(x, y) = 135◦, then the pixels (x + 1, y − 1), (x, y), and (x − 1, y + 1) are examined.
-//If pixel (x, y) has the highest gradient magnitude of the three pixels examined, it is kept as an edge. If one of the
-//other two pixels has a higher gradient magnitude, then pixel (x, y) is not on the “center” of the edge and should not
-//be classified as an edge pixel.
+            //TODO: this estimation is wrong i think!
+            //var newR = Math.Abs(GXR) + Math.Abs(GYR);
+            //var newG = Math.Abs(GXG) + Math.Abs(GYG);
+            //var newB = Math.Abs(GXB) + Math.Abs(GYB);
+
+            //try these
+            var newR = Math.Sqrt(GXR * GXR + GYR * GYR);
+            var newG = Math.Sqrt(GXG * GXG + GYG * GYG);
+            var newB = Math.Sqrt(GXB * GXB + GYB * GYB);
+            double orientation, toAngle = 180.0 / System.Math.PI;
+
+            // --- get orientation
+            if (GXR == 0)
+            {
+                // can not divide by zero
+                orientation = (GYR == 0) ? 0 : 90;
+            }
+            else
+            {
+                double div = (double)GYR / GXR;
+
+                // handle angles of the 2nd and 4th quads
+                if (div < 0)
+                {
+                    orientation = 180 - System.Math.Atan(-div) * toAngle;
+                }
+                // handle angles of the 1st and 3rd quads
+                else
+                {
+                    orientation = System.Math.Atan(div) * toAngle;
+                }
+
+                // get closest angle from 0, 45, 90, 135 set
+                if (orientation < 22.5)
+                    orientation = 0;
+                else if (orientation < 67.5)
+                    orientation = 45;
+                else if (orientation < 112.5)
+                    orientation = 90;
+                else if (orientation < 157.5)
+                    orientation = 135;
+                else orientation = 0;
+            }
+
+            // save orientation
+           // orients[p] = (byte)orientation;
+               
+
+            //if (newR > 255) newR = 255;
+            //if (newG > 255) newG = 255;
+            //if (newB > 255) newB = 255;
+            var r = newR;
+            var g = newG;
+            var b = newB;
+            returnList.Add(r);
+            //returnList.Add(g);
+            //returnList.Add(b);
+            returnList.Add(orientation);
+
+           // returnList.AddRange(convertedThetas);
+
 
             return returnList;
         }
 
-        private List<byte> SobelDetection(int x, int y, ImageReader.ImageReader image)
+        private List<byte> SobelDetection(int x, int y, ImageReader image)
         {
             var returnList = new List<byte>();
 
@@ -1149,156 +1465,54 @@ namespace DetectionAndMatching.UI.ViewModels
                 GYB += GY[i] * BArray[i];
             }
 
-            var newR = Math.Abs(GXR) + Math.Abs(GYR);
-            var newG = Math.Abs(GXG) + Math.Abs(GYG);
-            var newB = Math.Abs(GXB) + Math.Abs(GYB);
-            
-            //TODO: add this for Canny Detector
-            double thetaR;
-            //if (GXR == 0)
-            //{
-            //    if (GYR == 0)
-            //    {
-            //        thetaR = 0;
-            //    }
-            //    else
-            //    {
-            //        thetaR = 90;
-            //    }
-            //}
-            //else
-            //{
-            //    thetaR = Math.Atan(GYR / GXR) * (180 / Math.PI);
-                
-            //}
-            double thetaG;
-            //if (GXG == 0)
-            //{
-            //    if (GYG == 0)
-            //    {
-            //        thetaG = 0;
-            //    }
-            //    else
-            //    {
-            //        thetaG = 90;
-            //    }
-            //}
-            //else
-            //{
-            //    thetaG = Math.Atan(GYG / GXG) * (180 / Math.PI);
-            //}
-            double thetaB;
-            //if (GXB == 0)
-            //{
-            //    if (GYB == 0)
-            //    {
-            //        thetaB = 0;
-            //    }
-            //    else
-            //    {
-            //        thetaB = 90;
-            //    }
-            //}
-            //else
-            //{
-            //    thetaB = Math.Atan(GYB / GXB) * (180 / Math.PI);
-            //}
+            //TODO: this estimation is wrong i think!
+            //var newR = Math.Abs(GXR) + Math.Abs(GYR);
+            //var newG = Math.Abs(GXG) + Math.Abs(GYG);
+            //var newB = Math.Abs(GXB) + Math.Abs(GYB);
 
-            thetaR = Math.Atan2(GYR, GXR) * (180 / Math.PI);
-            thetaG = Math.Atan2(GYG, GXG) * (180 / Math.PI);
-            thetaB = Math.Atan2(GYB, GXB) * (180 / Math.PI);
-            thetaR += 180;
-            thetaG += 180;
-            thetaB += 180;
-
-            List<double> thetas = new List<double>();
-            thetas.Add(thetaR);
-            thetas.Add(thetaG);
-            thetas.Add(thetaB);
-
-            List<byte> convertedThetas = new List<byte>();
-            /*
-             * Compute ′ by rounding the angle  to one of four directions 0◦, 45◦, 90◦, or 135◦.
-             * Obviously for edges, 180◦ = 0◦, 225◦ = 45◦, etc. This means  in the ranges
-             * [−22.5◦...22.5◦] and [157.5◦...202.5◦] would “round” to ′ = 0◦. For a pictoral
-             * representation, each edge take on one of for colors: Here, the colors would repeat
-             * on the lower half of the circle (green around 225◦, blue around 270◦, and red around 315◦).
-             * 
-             * 
-             * 
-             * if((thisangle <22.5&&thisangle>0)&&(thisangle<202.5&&thisangle>157.5)&&(thisangle<360&&thisangle>337.5))
-             * {
-             * }
-             * 0 to 22.5
-157.5 to 202.5
-337.5 to 360
-
-0
- 
-
-             * if ((thisAngle < 67.5 && thisAngle > 22.5) && (thisAngle < 247.5 && thisAngle > 202.5)
-                  )
-                {
-                }
-22.5 to 67.5
-202.5 to 247.5
-
-1
- 
-
-             * if ((thisAngle < 112.5 && thisAngle > 67.5) && (thisAngle < 292.5 && thisAngle > 247.5))
-                {
-                    //2
-                }
-67.5 to 112.5
-247.5 to 292.5
-
-2
- 
-
-             * if ((thisAngle < 157.5 && thisAngle > 112.5) && (thisAngle < 337.5 && thisAngle > 292.5))
-                {
-                    //3
-                }
-112.5 to 157.5
-292.5 to 337.5
-
-
-             * */
-            foreach (var thisAngle in thetas)
+            //try these
+            var newR = Math.Sqrt(GXR * GXR + GYR * GYR);
+            var newG = Math.Sqrt(GXG * GXG + GYG * GYG);
+            var newB = Math.Sqrt(GXB * GXB + GYB * GYB);
+            double orientation, toAngle = 180.0 / System.Math.PI;
+            // --- get orientation
+            if (GXR == 0)
             {
-                bool set = false;
-                //if (((thisAngle < 22.5) && (thisAngle > -22.5)) || (thisAngle > 157.5) || (thisAngle < -157.5)) convertedThetas.Add(0); //  newAngle = 0;
-                //if (((thisAngle > 22.5) && (thisAngle < 67.5)) || ((thisAngle < -112.5) && (thisAngle > -157.5))) convertedThetas.Add(45); // newAngle = 45;
-                //if (((thisAngle > 67.5) && (thisAngle < 112.5)) || ((thisAngle < -67.5) && (thisAngle > -112.5))) convertedThetas.Add(90); //newAngle = 90;
-                //if (((thisAngle > 112.5) && (thisAngle < 157.5)) || ((thisAngle < -22.5) && (thisAngle > -67.5))) convertedThetas.Add(135); //newAngle = 135;
-                //  convertedThetas.Add(Convert.ToByte(Math.Abs(thisAngle)));
-                if ((thisAngle < 22.5 && thisAngle > 0) || (thisAngle < 202.5 && thisAngle > 157.5)
-                    || (thisAngle <= 360 && thisAngle > 337.5))
-                {
-                    convertedThetas.Add(0);
-                    set = true;
-                }
-                if ((thisAngle < 67.5 && thisAngle > 22.5) || (thisAngle < 247.5 && thisAngle > 202.5))
-                {
-                    convertedThetas.Add(85);
-                    set = true;
-                }
-                if ((thisAngle < 112.5 && thisAngle > 67.5) || (thisAngle < 292.5 && thisAngle > 247.5))
-                {
-                    convertedThetas.Add(170);
-                    set = true;
-                }
-                if ((thisAngle < 157.5 && thisAngle > 112.5) || (thisAngle < 337.5 && thisAngle > 292.5))
-                {
-                    convertedThetas.Add(255);
-                    set = true;
-                }
-                if (set == false)
-                {
-                    int stopper = -1;
-                }
+                // can not divide by zero
+                orientation = (GYR == 0) ? 0 : 90;
             }
+            else
+            {
+                double div = (double)GYR / GXR;
+
+                // handle angles of the 2nd and 4th quads
+                if (div < 0)
+                {
+                    orientation = 180 - System.Math.Atan(-div) * toAngle;
+                }
+                // handle angles of the 1st and 3rd quads
+                else
+                {
+                    orientation = System.Math.Atan(div) * toAngle;
+                }
+
+                // get closest angle from 0, 45, 90, 135 set
+                if (orientation < 22.5)
+                    orientation = 0;
+                else if (orientation < 67.5)
+                    orientation = 45;
+                else if (orientation < 112.5)
+                    orientation = 90;
+                else if (orientation < 157.5)
+                    orientation = 135;
+                else orientation = 0;
+            }
+
+            // save orientation
+            var convertedThetas = new List<byte>();
+            convertedThetas.Add((byte)orientation);
+            convertedThetas.Add((byte)orientation);
+            convertedThetas.Add((byte)orientation);
 
             if (newR > 255) newR = 255;
             if (newG > 255) newG = 255;
@@ -1340,11 +1554,11 @@ namespace DetectionAndMatching.UI.ViewModels
             //   }
             //   return ret;
 
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
             image.ConvertToGrey();
             const int StartBorder = 0;
             const int EndBorder = 1; //border of one for 3x3 mean block
-            var resultImage = new ImageReader.ImageReader();
+            var resultImage = new ImageReader();
             resultImage.Count = image.Count;
             resultImage.Height = image.Height;
             resultImage.Width = image.Width;
@@ -1371,7 +1585,7 @@ namespace DetectionAndMatching.UI.ViewModels
                 }
             }
 
-            var GaussImage = new ImageReader.ImageReader();
+            var GaussImage = new ImageReader();
             GaussImage.Count = resultImage.Count;
             GaussImage.Height = resultImage.Height;
             GaussImage.Width = resultImage.Width;
@@ -1421,7 +1635,7 @@ public bool KrischCommandEnabled
     set { _krischCommandEnabled = value; }
 }
 
-private List<byte> Krisch(int x, int y, ImageReader.ImageReader image)
+private List<byte> Krisch(int x, int y, ImageReader image)
 {
     var returnList = new List<byte>();
     var cr = image.GetPixel(x + 1, y, 0);
@@ -1498,7 +1712,7 @@ private List<int[,]> templates = new List<int[,]>
         }
         private void EqualizeHistogramCommandExecute()
         {
-            var image = new ImageReader.ImageReader(LeftPictureLocation);
+            var image = new ImageReader(LeftPictureLocation);
 
             var L = 256 - 1;
             var MN = image.Width * image.Height;
@@ -1529,7 +1743,7 @@ private List<int[,]> templates = new List<int[,]>
                 double eq = (((double)(cdf[item] - min) / (double)(MN - min)) * (double)L);
                 newImage.Add((byte)Math.Round(eq, MidpointRounding.ToEven));
             }
-            var newImageFile = new ImageReader.ImageReader();
+            var newImageFile = new ImageReader();
             newImageFile.Width = image.Width;
             newImageFile.Height = image.Height;
             newImageFile.Pixels = newImage;
