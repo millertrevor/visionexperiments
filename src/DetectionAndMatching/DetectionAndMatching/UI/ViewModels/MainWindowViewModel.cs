@@ -15,6 +15,7 @@ using PixelMap;
 namespace DetectionAndMatching.UI.ViewModels
 {
     using System.IO;
+    using System.Windows.Shapes;
 
     using ImageLib;
 
@@ -878,19 +879,8 @@ namespace DetectionAndMatching.UI.ViewModels
             var image = new ImageReader(LeftPictureLocation);
             image.ConvertToGrey();
             image.SaveAsBitmap("1GreyTest.bmp");
-          //  CannyEdgeDetector ce = new CannyEdgeDetector();
-          //  ce.Apply("1GreyTest.bmp");
-
-            const int StartBorder = 0;
-            const int EndBorder = 1; //border of one for 3x3 mean block
-            var resultImage = new ImageReader();
-            resultImage.Count = image.Count;
-            resultImage.Height = image.Height;
-            resultImage.Width = image.Width;
-            resultImage.depth = image.depth;
-            resultImage.Pixels = new List<byte>(image.Pixels);
-            
             //Gauss the image first
+            var gaussImageToSend = new byte[image.Width,image.Height];
             for (var h = 0; h < image.Height; h++)
             {
                 for (var w = 0; w < image.Width; w++)
@@ -900,167 +890,311 @@ namespace DetectionAndMatching.UI.ViewModels
                         if (w >= 2 && w < image.Width - 2)
                         {
                             var returnList = this.FindGaussian(w, h, 5, 1.4, image);
-                            resultImage.SetPixel(w, h, 0, returnList[0]);
-                            resultImage.SetPixel(w, h, 1, returnList[1]);
-                            resultImage.SetPixel(w, h, 2, returnList[2]);
-                        }
-                    }
-                }
-            }
-
-            var GaussImage = new ImageReader();
-            GaussImage.Count = resultImage.Count;
-            GaussImage.Height = resultImage.Height;
-            GaussImage.Width = resultImage.Width;
-            GaussImage.depth = resultImage.depth;
-            GaussImage.Pixels = new List<byte>(resultImage.Pixels);
-            GaussImage.SaveAsBitmap("1Gausstest.bmp");
-            
-            var CannyImage = new ImageReader();
-            CannyImage.Count = resultImage.Count;
-            CannyImage.Height = resultImage.Height;
-            CannyImage.Width = resultImage.Width;
-            CannyImage.depth = resultImage.depth;
-            CannyImage.Pixels = new List<byte>(resultImage.Pixels);
-
-
-            //then Sobel
-            for (var h = 0; h < GaussImage.Height; h++)
-            {
-                for (var w = 0; w < GaussImage.Width; w++)
-                {
-                    if (h > StartBorder && h < GaussImage.Height - EndBorder)
-                    {
-                        if (w > StartBorder && w < GaussImage.Width - EndBorder)
-                        {
-                            //can average here
-                            var returnList = this.SobelDetection(w, h, GaussImage);
-                            resultImage.SetPixel(w, h, 0, returnList[0]);
-                            resultImage.SetPixel(w, h, 1, returnList[1]);
-                            resultImage.SetPixel(w, h, 2, returnList[2]);
-
-                            ////quantize all angles into the 4 groups.
-                            //// This doesn't seem to be very quantized!
-                            ////Perhaps an issue here.
-                            //CannyImage.SetPixel(w, h, 0, returnList[3]);
-                            //CannyImage.SetPixel(w, h, 1, returnList[4]);
-                            //CannyImage.SetPixel(w, h, 2, returnList[5]);
-                        }
-                    }
-                }
-            }
-            List<double> GM = new List<double>();
-            double maxGrad = double.NegativeInfinity;
-            var HoldingTank = new double[GaussImage.Width,GaussImage.Height];
-            var orientations = new double[GaussImage.Width, GaussImage.Height];
-            for (var h = 0; h < GaussImage.Height; h++)
-            {
-                for (var w = 0; w < GaussImage.Width; w++)
-                {
-                    if (h > StartBorder && h < GaussImage.Height - EndBorder)
-                    {
-                        if (w > StartBorder && w < GaussImage.Width - EndBorder)
-                        {
-                            //can average here
-                            var returnList = this.GradiantDetection(w, h, GaussImage);
                             //resultImage.SetPixel(w, h, 0, returnList[0]);
-                            //resultImage.SetPixel(w, h, 1, returnList[1]);
+                           // resultImage.SetPixel(w, h, 1, returnList[1]);
                             //resultImage.SetPixel(w, h, 2, returnList[2]);
-                            GM.Add(returnList[0]);
-                            HoldingTank[w, h] = returnList[0];
-                            if (returnList[0] > maxGrad)
-                            {
-                                maxGrad = returnList[0];
-                            }
-                            orientations[w, h] = returnList[1];
-                            //quantize all angles into the 4 groups.
-                            // This doesn't seem to be very quantized!
-                            //Perhaps an issue here.
-                            //CannyImage.SetPixel(w, h, 0, returnList[3]);
-                            //CannyImage.SetPixel(w, h, 1, returnList[4]);
-                            //CannyImage.SetPixel(w, h, 2, returnList[5]);
-                        }
-                        else{GM.Add(0);}
-                    }
-                    else { GM.Add(0); }
-                }
-            }
-            //Console.WriteLine("Gradiant:");
-            //foreach (var item in GM)
-            //{
-            //    Console.WriteLine(item);
-            //}
-
-
-            resultImage.SaveAsBitmap("1SobelTest.bmp");
-            CannyImage.SaveAsBitmap("1CannyGradiantTest.bmp");
-            var LinesImage = new ImageReader();
-            LinesImage.Count = image.Count;
-            LinesImage.Height = image.Height;
-            LinesImage.Width = image.Width;
-            LinesImage.depth = image.depth;
-            LinesImage.Pixels = new List<byte>(image.Pixels);
-
-            for (var h = 0; h < CannyImage.Height; h++)
-            {
-                for (var w = 0; w < CannyImage.Width; w++)
-                {
-                    if (h > StartBorder && h < CannyImage.Height - EndBorder)
-                    {
-                        if (w > StartBorder && w < CannyImage.Width - EndBorder)
-                        {
-                            //maximum supression?
-                            //Not sure this is working either!
-                            //var returnList = this.CannyDetection(w, h, resultImage, CannyImage);
-                            var returnList = this.CannyDetection(w, h, HoldingTank, orientations,maxGrad);
-                            LinesImage.SetPixel(w, h, 0, returnList[0]);
-                            LinesImage.SetPixel(w, h, 1, returnList[1]);
-                            LinesImage.SetPixel(w, h, 2, returnList[2]);
+                            gaussImageToSend[w, h] = returnList[0];
                         }
                     }
                 }
             }
-            LinesImage.SaveAsBitmap("1LinesCannyImage.bmp");
-            //compare the linesImage with the resultsimage.
-            //results should be gradiant.
-            //threshold the gradiant on the pixels that have a valid linesImage result??
 
-            var EdgeImage = new ImageReader();
-            EdgeImage.Count = image.Count;
-            EdgeImage.Height = image.Height;
-            EdgeImage.Width = image.Width;
-            EdgeImage.depth = image.depth;
-            EdgeImage.Pixels = new List<byte>(image.Pixels);
-
-            int CEStartBorder = 2;
-            int CEEndBorder = 2;
-            //TODO: make this more configurable
-            //can't be right on the edge for the 5x5 window
-            for (var h = 0; h < LinesImage.Height - 2; h++)
+            var rect = new Rect(0, 0, image.Width, image.Height);
+            var returnImage = ProcessCannyFilter(gaussImageToSend, rect, 10,15);
+            ImageReader processedImage = new ImageReader();
+            processedImage.Height = image.Height;
+            processedImage.Width = image.Width;
+            processedImage.Count = image.Count;
+            processedImage.depth = image.depth;
+            processedImage.Pixels = new List<byte>();
+            for (var h = 0; h < image.Height; h++)
             {
-                for (var w = 0; w < LinesImage.Width-2; w++)
+                for (var w = 0; w < image.Width; w++)
                 {
-                    if (h > CEStartBorder && h < LinesImage.Height - CEEndBorder)
+                    byte value = 0;
+                    if (returnImage[w,h] > 0)
                     {
-                        if (w > CEStartBorder && w < LinesImage.Width - CEEndBorder)
-                        {
-                            var returnList = this.ThresholdSupression(w, h, 20, 100, LinesImage);
-                            EdgeImage.SetPixel(w, h, 0, returnList[0]);
-                            EdgeImage.SetPixel(w, h, 1, returnList[1]);
-                            EdgeImage.SetPixel(w, h, 2, returnList[2]);
-                        }
+                        value = 255;
                     }
+                    processedImage.Pixels.Add(value);
+                    processedImage.Pixels.Add(value);
+                    processedImage.Pixels.Add(value);
                 }
             }
 
 
             var fi = new System.IO.FileInfo(LeftPictureLocation);
-            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "EdgeCanny" + fi.Name;
+            var modifiedName = fi.Directory.FullName + System.IO.Path.DirectorySeparatorChar + "1TryMightEdgeCanny" + fi.Name;
             //resultImage.SaveAsBitmap(modifiedName);
             //LinesImage.SaveAsBitmap(modifiedName);
-            EdgeImage.SaveAsBitmap(modifiedName);
+            processedImage.SaveAsBitmap(modifiedName);
 
             LoadRightImage(modifiedName);
+        }
+
+        private int[] FindGradient(int x, int y, byte[,] image)
+        {
+            List<int> stuff = new List<int>();
+
+
+            var oneR = image[x - 1, y - 1];
+            var twoR = image[x, y - 1];
+            var threeR = image[x + 1, y - 1];
+            var fourR = image[x - 1, y];
+            var fiveR = image[x, y];
+            var sixR = image[x + 1, y];
+            var sevenR = image[x - 1, y + 1];
+            var eightR = image[x, y + 1];
+            var nineR = image[x + 1, y + 1];
+
+            var GX = new List<int> { -1, 0, 1, -2, 0, 2, -1, 0, 1 };
+            var GY = new List<int> { 1, 2, 1, 0, 0, 0, -1, -2, -1 };
+            var RArray = new List<byte> { oneR, twoR, threeR, fourR, fiveR, sixR, sevenR, eightR, nineR };
+
+            int GXR = 0;
+            int GYR = 0;
+            for (int i = 0; i < 9; i++)
+            {
+                GXR += GX[i] * RArray[i];
+
+                GYR += GY[i] * RArray[i];
+            }
+            //var newR = Math.Sqrt(GXR * GXR + GYR * GYR);
+            stuff.Add(GXR);
+            stuff.Add(GYR);
+
+            return stuff.ToArray();
+        }
+
+        private byte[,] ProcessCannyFilter(byte[,] image, Rect rect, byte lowThreshold, byte highThreshold)
+        {
+            // processing start and stop X,Y positions
+            int startX = (int)rect.X + 1;
+            int startY = (int)rect.Y + 1;
+            int stopX = (int)(startX + rect.Width - 2);
+            int stopY = (int)(startY + rect.Height - 2);
+
+            int width = (int)(rect.Width - 2);
+            int height = (int)(rect.Height - 2);
+
+            int dstStride = (int)rect.Width;
+            int srcStride = (int)rect.Width;
+
+            int dstOffset = dstStride - (int)rect.Width + 2;
+            int srcOffset = srcStride - (int)rect.Width + 2;
+
+            // pixel's value and gradients
+            int gx, gy;
+            //
+            double orientation, toAngle = 180.0 / Math.PI;
+            float leftPixel = 0, rightPixel = 0;
+
+            // TODO: Image already comes in as BW and Gaussian Blurred
+            // STEP 1 - blur image
+           // UnmanagedImage blurredImage = gaussianFilter.Apply(source);
+           // blurredImage.ToManagedImage(true).Save("CEGAUSS.bmp");
+            // orientation array
+            byte[] orients = new byte[width * height];
+            // gradients array
+            float[,] gradients = new float[(int)(rect.Width), (int)(rect.Height)];
+            float maxGradient = float.NegativeInfinity;
+
+            // do the job
+           // byte* src = (byte*)blurredImage.ImageData.ToPointer();
+            var src = image;
+            // allign pointer
+           // src += srcStride * startY + startX;
+
+            // STEP 2 - calculate magnitude and edge orientation
+            int p = 0;
+            
+            // for each line
+            for (int y = startY; y < stopY; y++)
+            {
+                // for each pixel
+                for (int x = startX; x < stopX; x++, p++)
+                {
+                    var list = FindGradient(x, y, src);
+                    gx = list[0];
+                    gy = list[1];
+                    //gx = src[-srcStride + 1] + src[srcStride + 1]
+                    //   - src[-srcStride - 1] - src[srcStride - 1]
+                    //   + 2 * (src[1] - src[-1]);
+
+                    //gy = src[-srcStride - 1] + src[-srcStride + 1]
+                    //   - src[srcStride - 1] - src[srcStride + 1]
+                    //   + 2 * (src[-srcStride] - src[srcStride]);
+
+                    // get gradient value
+                    gradients[x, y] = (float)Math.Sqrt(gx * gx + gy * gy);
+                    if (gradients[x, y] > maxGradient)
+                        maxGradient = gradients[x, y];
+
+                    // --- get orientation
+                    if (gx == 0)
+                    {
+                        // can not divide by zero
+                        orientation = (gy == 0) ? 0 : 90;
+                    }
+                    else
+                    {
+                        double div = (double)gy / gx;
+
+                        // handle angles of the 2nd and 4th quads
+                        if (div < 0)
+                        {
+                            orientation = 180 - System.Math.Atan(-div) * toAngle;
+                        }
+                        // handle angles of the 1st and 3rd quads
+                        else
+                        {
+                            orientation = System.Math.Atan(div) * toAngle;
+                        }
+
+                        // get closest angle from 0, 45, 90, 135 set
+                        if (orientation < 22.5)
+                            orientation = 0;
+                        else if (orientation < 67.5)
+                            orientation = 45;
+                        else if (orientation < 112.5)
+                            orientation = 90;
+                        else if (orientation < 157.5)
+                            orientation = 135;
+                        else orientation = 0;
+                    }
+
+                    // save orientation
+                    orients[p] = (byte)orientation;
+                }
+                //src += srcOffset;
+            }
+            ////////////////////////////////////////////////////////////////////////////////////
+            // byte[] orients = new byte[width * height];
+            // gradients array
+            // float[,] gradients = new float[source.Width, source.Height];
+            //Console.WriteLine("Writing out gradients");
+            //foreach (var item in gradients)
+            //{
+            //    Console.WriteLine(item);
+            //}
+            //////////////////////////////////////////////////////////////////////////////
+            // STEP 3 - suppres non maximums
+         //   byte* dst = (byte*)destination.ImageData.ToPointer();
+            // allign pointer
+          //  dst += dstStride * startY + startX;
+            var dst = new byte[(int)rect.Width,(int)rect.Height];
+
+            p = 0;
+
+            // for each line
+            for (int y = startY; y < stopY; y++)
+            {
+                // for each pixel
+                for (int x = startX; x < stopX; x++, p++)
+                {
+                    // get two adjacent pixels
+                    switch (orients[p])
+                    {
+                        case 0:
+                            leftPixel = gradients[x - 1, y];
+                            rightPixel = gradients[x + 1, y];
+                            break;
+                        case 45:
+                            leftPixel = gradients[x - 1, y + 1];
+                            rightPixel = gradients[x + 1, y - 1];
+                            break;
+                        case 90:
+                            leftPixel = gradients[x, y + 1];
+                            rightPixel = gradients[x, y - 1];
+                            break;
+                        case 135:
+                            leftPixel = gradients[x + 1, y + 1];
+                            rightPixel = gradients[x - 1, y - 1];
+                            break;
+                    }
+                    // compare current pixels value with adjacent pixels
+                    if ((gradients[x, y] < leftPixel) || (gradients[x, y] < rightPixel))
+                    {
+                        //*dst = 0;
+                        dst[x, y] = 0;
+                    }
+                    else
+                    {
+                        var value = (byte)(gradients[x, y] / maxGradient * 255);
+                       // if (value != 0)
+                        //    Console.WriteLine(":" + value);
+                        //*dst = (byte)(gradients[x, y] / maxGradient * 255);
+                        dst[x, y] = value;
+                    }
+                }
+               // dst += dstOffset;
+            }
+
+            // STEP 4 - hysteresis
+          //  dst = (byte*)destination.ImageData.ToPointer();
+            // allign pointer
+           // dst += dstStride * startY + startX;
+
+            // for each line
+            for (int y = startY; y < stopY; y++)
+            {
+                // for each pixel
+                for (int x = startX; x < stopX; x++)
+                {
+                    if (dst[x,y] < highThreshold)
+                    {
+                        if (dst[x,y] < lowThreshold)
+                        {
+                            // non edge
+                            dst[x,y] = 0;
+                        }
+                        else
+                        {
+                            var test = this.CannyHThresholdChecker(dst, x, y, lowThreshold, highThreshold);
+                            // check 8 neighboring pixels
+                            if (test)
+                            {
+                                dst[x,y] = 0;
+                            }
+                        }
+                    }
+                }
+               // dst += dstOffset;
+            }
+
+            // STEP 5 - draw black rectangle to remove those pixels, which were not processed
+            // (this needs to be done for those cases, when filter is applied "in place" -
+            //  source image is modified instead of creating new copy)
+          //  Drawing.Rectangle(destination, rect, Color.Black);
+
+            // release blurred image
+           // blurredImage.Dispose();
+            return dst;
+        }
+        private bool CannyHThresholdChecker(byte[,] image,int x, int y, byte lowThreshold, byte highThreshold)
+        {
+            bool RV = false;
+            var oneR = image[x - 1, y - 1];
+            var twoR = image[x, y - 1];
+            var threeR = image[x + 1, y - 1];
+            var fourR = image[x - 1, y];
+            var fiveR = image[x, y];
+            var sixR = image[x + 1, y];
+            var sevenR = image[x - 1, y + 1];
+            var eightR = image[x, y + 1];
+            var nineR = image[x + 1, y + 1];
+            //(dst[-1] < highThreshold) &&
+            //                    (dst[1] < highThreshold) &&
+            //                    (dst[-dstStride - 1] < highThreshold) &&
+            //                    (dst[-dstStride] < highThreshold) &&
+            //                    (dst[-dstStride + 1] < highThreshold) &&
+            //                    (dst[dstStride - 1] < highThreshold) &&
+            //                    (dst[dstStride] < highThreshold) &&
+            //                    (dst[dstStride + 1] < highThreshold)
+            RV = oneR < highThreshold && twoR < highThreshold && threeR < highThreshold && fourR < highThreshold
+                 && sixR < highThreshold && sevenR < highThreshold && eightR < highThreshold
+                 && nineR < highThreshold;
+            return RV;
         }
 
         private List<byte> ThresholdSupression(int x, int y,int thresholdLow, int thresholdHigh, ImageReader image)
