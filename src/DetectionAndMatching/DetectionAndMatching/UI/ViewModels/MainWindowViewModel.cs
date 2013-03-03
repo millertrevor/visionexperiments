@@ -1150,7 +1150,7 @@ namespace DetectionAndMatching.UI.ViewModels
                         }
                         else
                         {
-                            var test = this.CannyHThresholdChecker(dst, x, y, lowThreshold, highThreshold);
+                            var test = this.CannyHThresholdChecker(dst, x, y,(int)rect.Width,(int)rect.Height, lowThreshold, highThreshold);
                             // check 8 neighboring pixels
                             if (test)
                             {
@@ -1171,7 +1171,7 @@ namespace DetectionAndMatching.UI.ViewModels
            // blurredImage.Dispose();
             return dst;
         }
-        private bool CannyHThresholdChecker(byte[,] image,int x, int y, byte lowThreshold, byte highThreshold)
+        private bool CannyHThresholdChecker(byte[,] image,int x, int y,int width,int height, byte lowThreshold, byte highThreshold)
         {
             bool RV = false;
             var oneR = image[x - 1, y - 1];
@@ -1183,17 +1183,42 @@ namespace DetectionAndMatching.UI.ViewModels
             var sevenR = image[x - 1, y + 1];
             var eightR = image[x, y + 1];
             var nineR = image[x + 1, y + 1];
-            //(dst[-1] < highThreshold) &&
-            //                    (dst[1] < highThreshold) &&
-            //                    (dst[-dstStride - 1] < highThreshold) &&
-            //                    (dst[-dstStride] < highThreshold) &&
-            //                    (dst[-dstStride + 1] < highThreshold) &&
-            //                    (dst[dstStride - 1] < highThreshold) &&
-            //                    (dst[dstStride] < highThreshold) &&
-            //                    (dst[dstStride + 1] < highThreshold)
+          
             RV = oneR < highThreshold && twoR < highThreshold && threeR < highThreshold && fourR < highThreshold
                  && sixR < highThreshold && sevenR < highThreshold && eightR < highThreshold
                  && nineR < highThreshold;
+
+            if (RV == true)
+            {
+                var secondTest = oneR > lowThreshold || twoR > lowThreshold || threeR > lowThreshold || fourR > lowThreshold
+                 || sixR > lowThreshold || sevenR > lowThreshold || eightR > lowThreshold
+                 || nineR > lowThreshold;
+
+                if (secondTest && x > 2 && y > 2 && x < width - 2 && y < height - 2)
+                {
+                    int size = 5;
+                    var locationP = (size - 1) / 2;
+
+                    List<byte> LargeWindow = new List<byte>();
+                    for (int j = -locationP; j < locationP + 1; j++)
+                    {
+                        for (int i = -locationP; i < locationP + 1; i++)
+                        {
+                            LargeWindow.Add(image[x + i, y + j]);
+                        }
+                    }
+
+                    foreach (var item in LargeWindow)
+                    {
+                        if (item > highThreshold)
+                        {
+                            RV = false;
+                            break;
+                        }
+                    }
+                }
+            }
+
             return RV;
         }
 
