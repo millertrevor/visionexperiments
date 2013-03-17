@@ -174,7 +174,7 @@ namespace ImageReader
             Pixels[elementToSet] = value;
         }
         
-        public void ConvertToGrey()
+        public void ConvertToAverageGrey()
         {
             for (var i = 0; i < this.Pixels.Count; i += 3)
             {
@@ -182,6 +182,25 @@ namespace ImageReader
                 var green = (int)this.Pixels[i + 1];
                 var blue = (int)this.Pixels[i + 2];
                 var grey = (byte)((red + green + blue) / 3);
+                this.Pixels[i] = grey;
+                this.Pixels[i + 1] = grey;
+                this.Pixels[i + 2] = grey;
+            }
+        }
+        public void ConvertToGrey()
+        {
+            ConvertToGrey(.2125, .7154, .0721);
+        }
+        public void ConvertToGrey(double rFactor, double gFactor, double bFactor)
+        {
+            for (var i = 0; i < this.Pixels.Count; i += 3)
+            {
+                var red = (int)this.Pixels[i];
+                var green = (int)this.Pixels[i + 1];
+                var blue = (int)this.Pixels[i + 2];
+                //float Y = 0.212671f * p.R + 0.715160f * p.G + 0.072169f * p.B;
+                // (r*.2125)+(g*.7154)+(b*.0721)
+                var grey = (byte)(Math.Floor((red*rFactor) + (green*gFactor) + (blue*bFactor)) );
                 this.Pixels[i] = grey;
                 this.Pixels[i + 1] = grey;
                 this.Pixels[i + 2] = grey;
