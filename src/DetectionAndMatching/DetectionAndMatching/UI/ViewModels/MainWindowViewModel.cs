@@ -854,6 +854,37 @@ namespace DetectionAndMatching.UI.ViewModels
         }
 
 
+        private ICommand _houghTransformCommand;
+        public ICommand HoughTransformCommand
+        {
+            get
+            {
+                return _houghTransformCommand
+                       ?? (_houghTransformCommand =
+                           new RelayCommand(
+                               param => HoughTransformCommandExecute(), param => HoughTransformCommandEnabled));
+            }
+        }
+
+        private bool _houghTransformCommandEnabled = true;
+        public bool HoughTransformCommandEnabled
+        {
+            get { return _houghTransformCommandEnabled; }
+            set { _houghTransformCommandEnabled = value; }
+        }
+
+        private void HoughTransformCommandExecute()
+        {
+            var image = new ImageReader(LeftPictureLocation);
+            // var gaussImageToSend = new byte[image.Width,image.Height];
+            for (var h = 0; h < image.Height; h++)
+            {
+                for (var w = 0; w < image.Width; w++)
+                {
+                }
+            }
+        }
+
         private ICommand _cannyCommand;
         public ICommand CannyCommand
         {
