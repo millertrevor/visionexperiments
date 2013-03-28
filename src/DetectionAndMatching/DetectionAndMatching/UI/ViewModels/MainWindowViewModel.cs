@@ -877,12 +877,24 @@ namespace DetectionAndMatching.UI.ViewModels
         {
             var image = new ImageReader(LeftPictureLocation);
             // var gaussImageToSend = new byte[image.Width,image.Height];
+            List<string> outputList = new List<string>();
             for (var h = 0; h < image.Height; h++)
             {
                 for (var w = 0; w < image.Width; w++)
                 {
+                    var pixel = image.GetPixel(w, h, 0);
+                    if (pixel == 255)
+                    {
+                        for (int i = -90; i <= 90; i++)
+                        {
+                            double angle = Math.PI * i / 180.0;
+                            var phi = w * Math.Cos(angle) + h * Math.Sin(angle);
+                           outputList.Add(phi.ToString() + "," + i.ToString());
+                        }
+                    }
                 }
             }
+            System.IO.File.WriteAllLines("test.txt", outputList.ToArray());
         }
 
         private ICommand _cannyCommand;
