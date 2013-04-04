@@ -872,10 +872,15 @@ namespace DetectionAndMatching.UI.ViewModels
             get { return _houghTransformCommandEnabled; }
             set { _houghTransformCommandEnabled = value; }
         }
-
+        //m = -cotθ
+        //c = p*cosecθ
+     
         private void HoughTransformCommandExecute()
         {
+            
             var image = new ImageReader(LeftPictureLocation);
+            int rhoMax =(int) Math.Round(Math.Sqrt((image.Width*image.Width)+(image.Height*image.Height)));
+              double[,] A = new double[180,rhoMax*2];
             // var gaussImageToSend = new byte[image.Width,image.Height];
             List<string> outputList = new List<string>();
             for (var h = 0; h < image.Height; h++)
@@ -888,8 +893,11 @@ namespace DetectionAndMatching.UI.ViewModels
                         for (int i = -90; i <= 90; i++)
                         {
                             double angle = Math.PI * i / 180.0;
-                            var phi = w * Math.Cos(angle) + h * Math.Sin(angle);
-                           outputList.Add(phi.ToString() + "," + i.ToString());
+                            var rho = (w * Math.Cos(angle)) + (h * Math.Sin(angle));
+                            int angleAccessor = (int)angle + 90;
+                            int rhoAccessor = ((int)Math.Round(rho))+rhoMax;
+                            A[angleAccessor, rhoAccessor]++;
+                           outputList.Add(rho.ToString() + "," + i.ToString());
                         }
                     }
                 }
