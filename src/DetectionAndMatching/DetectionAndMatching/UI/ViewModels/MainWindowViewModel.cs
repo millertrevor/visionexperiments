@@ -872,15 +872,20 @@ namespace DetectionAndMatching.UI.ViewModels
             get { return _houghTransformCommandEnabled; }
             set { _houghTransformCommandEnabled = value; }
         }
-        //m = -cotθ
+        //m = -cotθ  --- Math.PI/2 - Math.Atan(x)
         //c = p*cosecθ
+        //cosecant (csc), secant (sec), and cotangent (cot).
+        //Cosecant Cosec(X) = 1 / Sin(X) 
+        //Cotangent Cotan(X) = 1 / Tan(X) 
+        // var m = -1*(1/Math.tan(x));
+        // var c = p*(1/Math.Sin(x));
      
         private void HoughTransformCommandExecute()
         {
-            
             var image = new ImageReader(LeftPictureLocation);
             int rhoMax =(int) Math.Round(Math.Sqrt((image.Width*image.Width)+(image.Height*image.Height)));
               double[,] A = new double[180,rhoMax*2];
+              List<Tuple<double, double, double>> listOfThings = new List<Tuple<double, double, double>>();
             // var gaussImageToSend = new byte[image.Width,image.Height];
             List<string> outputList = new List<string>();
             for (var h = 0; h < image.Height; h++)
@@ -894,15 +899,68 @@ namespace DetectionAndMatching.UI.ViewModels
                         {
                             double angle = Math.PI * i / 180.0;
                             var rho = (w * Math.Cos(angle)) + (h * Math.Sin(angle));
+                            var rhoRounded = Math.Round(rho, 4);
                             int angleAccessor = (int)angle + 90;
                             int rhoAccessor = ((int)Math.Round(rho))+rhoMax;
                             A[angleAccessor, rhoAccessor]++;
+                            bool found = false;
+                            Tuple<double, double, double> itemToRemove = null;
+                            foreach (var item in listOfThings)
+                            {
+                                if (item.Item1 == i && item.Item2 == rhoRounded)
+                                {
+                                    found = true;
+                                    itemToRemove = item;
+                                    break;
+                                }
+                            }
+                            if (found == false)
+                            {
+                                listOfThings.Add(new Tuple<double, double, double>(i, rhoRounded, 1));
+                            }
+                            else
+                            {
+                                listOfThings.Remove(itemToRemove);
+                                listOfThings.Add(new Tuple<double, double, double>(itemToRemove.Item1, itemToRemove.Item2, itemToRemove.Item3 + 1));
+
+                            }
                            outputList.Add(rho.ToString() + "," + i.ToString());
                         }
                     }
                 }
             }
             System.IO.File.WriteAllLines("test.txt", outputList.ToArray());
+            int counter = 0;
+            //y = m*x + c
+            var newLinesImage = new ImageReader();
+            newLinesImage.Width = image.Width;
+            newLinesImage.Height = image.Height;
+            newLinesImage.Pixels = new List<byte>(image.Pixels);
+            newLinesImage.depth = image.depth;
+            newLinesImage.Count = image.Count;
+            
+            foreach (var item in listOfThings)
+            {
+                //if (item.Item3 >2)
+               // {
+                    counter++;
+                    var angle = item.Item1;
+                    double x = Math.PI * angle / 180.0;
+                    var p = item.Item2;
+                    var m = -1*(1/Math.Tan(x));
+                    var c = p*(1/Math.Sin(x));
+                    for (int ix = 0; ix < newLinesImage.Width; ix++)
+                    {
+                        var iy =(int)( (m * ix) + c);
+                        if (iy > 0 && iy < newLinesImage.Height)
+                        {
+                            newLinesImage.SetPixel(ix, iy, 0, 255);
+                        }
+                    }
+                //}
+            }
+            int stop = -1;
+            newLinesImage.SaveAsBitmap("MyLinesOutputFromHT.bmp");
         }
 
         private ICommand _cannyCommand;
